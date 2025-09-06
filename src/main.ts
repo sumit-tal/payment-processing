@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { AppMinimalModule } from './app-minimal.module';
 
 /**
  * Bootstrap the NestJS application
  */
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppMinimalModule);
 
   // Global validation pipe
   app.useGlobalPipes(

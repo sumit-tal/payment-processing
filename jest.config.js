@@ -10,10 +10,19 @@ module.exports = {
   ],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@/common/(.*)$': '<rootDir>/common/$1',
     '^@/modules/(.*)$': '<rootDir>/modules/$1',
     '^@/config/(.*)$': '<rootDir>/config/$1',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid)/)'
+  ],
+  extensionsToTreatAsEsm: ['.ts'],
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  }
 };

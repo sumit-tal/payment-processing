@@ -34,4 +34,4 @@ Implement the subscription module to handle recurring billing through the Author
 
 ## Status
 
-- [ ] Not Started
+- [x] Completed

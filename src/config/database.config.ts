@@ -21,15 +21,24 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
       username: this.configService.get<string>('DB_USERNAME', 'postgres'),
       password: this.configService.get<string>('DB_PASSWORD', 'password'),
       database: this.configService.get<string>('DB_NAME', 'payment_processing'),
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+      entities: [__dirname + '/../**/*.entity.js'],
       migrations: [__dirname + '/../migrations/*{.ts,.js}'],
       synchronize: this.configService.get<boolean>('DB_SYNCHRONIZE', false),
       logging: this.configService.get<boolean>('DB_LOGGING', false),
-      ssl: this.configService.get<boolean>('DB_SSL', false),
+      ssl: false,
+      retryAttempts: 1,
+      retryDelay: 1000,
+      autoLoadEntities: true,
       extra: {
         max: this.configService.get<number>('DB_MAX_CONNECTIONS', 10),
-        idleTimeoutMillis: this.configService.get<number>('DB_IDLE_TIMEOUT', 30000),
-        connectionTimeoutMillis: this.configService.get<number>('DB_CONNECTION_TIMEOUT', 2000),
+        idleTimeoutMillis: this.configService.get<number>(
+          'DB_IDLE_TIMEOUT',
+          30000,
+        ),
+        connectionTimeoutMillis: this.configService.get<number>(
+          'DB_CONNECTION_TIMEOUT',
+          2000,
+        ),
       },
     };
   }
