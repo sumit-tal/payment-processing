@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ApiKeyService } from '../../modules/auth/services/api-key.service';
@@ -28,7 +34,11 @@ export class ApiKeyAuthGuard implements CanActivate {
     const apiKey = this.extractApiKey(request);
 
     if (!apiKey) {
-      await this.logSecurityEvent(request, AuditAction.UNAUTHORIZED_ACCESS, 'No API key provided');
+      await this.logSecurityEvent(
+        request,
+        AuditAction.UNAUTHORIZED_ACCESS,
+        'No API key provided',
+      );
       throw new UnauthorizedException('API key is required');
     }
 
@@ -36,26 +46,32 @@ export class ApiKeyAuthGuard implements CanActivate {
       const apiKeyEntity = await this.apiKeyService.validateApiKey(apiKey);
 
       if (!apiKeyEntity) {
-        await this.logSecurityEvent(request, AuditAction.UNAUTHORIZED_ACCESS, 'Invalid API key');
+        await this.logSecurityEvent(
+          request,
+          AuditAction.UNAUTHORIZED_ACCESS,
+          'Invalid API key',
+        );
         throw new UnauthorizedException('Invalid API key');
       }
 
       // Check required permissions
-      const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
-        context.getHandler(),
-        context.getClass(),
-      ]);
+      const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
+        PERMISSIONS_KEY,
+        [context.getHandler(), context.getClass()],
+      );
 
       if (requiredPermissions && requiredPermissions.length > 0) {
-        const hasPermission = requiredPermissions.every(permission =>
-          apiKeyEntity.permissions.includes(permission) || apiKeyEntity.permissions.includes('*')
+        const hasPermission = requiredPermissions.every(
+          permission =>
+            apiKeyEntity.permissions.includes(permission) ||
+            apiKeyEntity.permissions.includes('*'),
         );
 
         if (!hasPermission) {
           await this.logSecurityEvent(
             request,
             AuditAction.UNAUTHORIZED_ACCESS,
-            `Insufficient permissions. Required: ${requiredPermissions.join(', ')}`
+            `Insufficient permissions. Required: ${requiredPermissions.join(', ')}`,
           );
           throw new ForbiddenException('Insufficient permissions');
         }
@@ -81,11 +97,18 @@ export class ApiKeyAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      if (error instanceof UnauthorizedException || error instanceof ForbiddenException) {
+      if (
+        error instanceof UnauthorizedException ||
+        error instanceof ForbiddenException
+      ) {
         throw error;
       }
 
-      await this.logSecurityEvent(request, AuditAction.UNAUTHORIZED_ACCESS, `Authentication error: ${error.message}`);
+      await this.logSecurityEvent(
+        request,
+        AuditAction.UNAUTHORIZED_ACCESS,
+        `Authentication error: ${error.message}`,
+      );
       throw new UnauthorizedException('Authentication failed');
     }
   }
@@ -108,15 +131,19 @@ export class ApiKeyAuthGuard implements CanActivate {
 
   private getClientIp(request: Request): string {
     return (
-      request.headers['x-forwarded-for'] as string ||
-      request.headers['x-real-ip'] as string ||
+      (request.headers['x-forwarded-for'] as string) ||
+      (request.headers['x-real-ip'] as string) ||
       request.connection.remoteAddress ||
       request.ip ||
       'unknown'
     );
   }
 
-  private async logSecurityEvent(request: Request, action: AuditAction, message: string): Promise<void> {
+  private async logSecurityEvent(
+    request: Request,
+    action: AuditAction,
+    message: string,
+  ): Promise<void> {
     await this.auditLogService.logSecurityEvent(
       action,
       this.getClientIp(request),
@@ -125,7 +152,7 @@ export class ApiKeyAuthGuard implements CanActivate {
       {
         endpoint: `${request.method} ${request.path}`,
         message,
-      }
+      },
     );
   }
 }

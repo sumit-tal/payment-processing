@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { WebhooksModule } from './modules/webhooks/webhooks.module';
 import { ObservabilityModule } from './modules/observability/observability.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { Transaction } from './database/entities/transaction.entity';
 import { ApiKey } from './database/entities/api-key.entity';
 import { AuditLog } from './database/entities/audit-log.entity';
@@ -53,6 +54,7 @@ import { WebhookEvent } from './database/entities/webhook-event.entity';
     HealthModule,
     PaymentsModule,
     WebhooksModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

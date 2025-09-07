@@ -8,11 +8,7 @@ import { AuditModule } from '../audit/audit.module';
 
 @Global()
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ApiKey]),
-    SecurityModule,
-    AuditModule,
-  ],
+  imports: [TypeOrmModule.forFeature([ApiKey]), SecurityModule, AuditModule],
   controllers: [ApiKeyController],
   providers: [ApiKeyService],
   exports: [ApiKeyService],
