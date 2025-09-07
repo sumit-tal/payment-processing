@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { WebhookEventType, WebhookEventStatus } from '../entities/webhook-event.entity';
+import { WebhookEventType, WebhookEventStatus } from '@/database/entities/webhook-event.entity';
 
 export class CreateWebhookEventDto {
   @ApiProperty({

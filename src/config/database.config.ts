@@ -14,31 +14,61 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
    * Create TypeORM configuration options
    */
   createTypeOrmOptions(): TypeOrmModuleOptions {
+    const toBool = (value: string | undefined, fallback: boolean): boolean => {
+      if (value === undefined) return fallback;
+      return value.toLowerCase() === 'true' || value === '1';
+    };
+
+    const toNum = (value: string | undefined, fallback: number): number => {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : fallback;
+    };
+
+    const host = this.configService.get<string>('DB_HOST', 'localhost');
+    const port = toNum(this.configService.get<string>('DB_PORT'), 5432);
+    const username = this.configService.get<string>('DB_USERNAME', 'postgres');
+    const password = this.configService.get<string>('DB_PASSWORD', 'password');
+    const database = this.configService.get<string>(
+      'DB_NAME',
+      'payment_processing',
+    );
+    const synchronize = toBool(
+      this.configService.get<string>('DB_SYNCHRONIZE'),
+      false,
+    );
+    const logging = toBool(this.configService.get<string>('DB_LOGGING'), false);
+    const ssl = toBool(this.configService.get<string>('DB_SSL'), false);
+    const max = toNum(this.configService.get<string>('DB_MAX_CONNECTIONS'), 10);
+    const idleTimeoutMillis = toNum(
+      this.configService.get<string>('DB_IDLE_TIMEOUT'),
+      30000,
+    );
+    const connectionTimeoutMillis = toNum(
+      this.configService.get<string>('DB_CONNECTION_TIMEOUT'),
+      2000,
+    );
+
     return {
       type: 'postgres',
-      host: this.configService.get<string>('DB_HOST', 'localhost'),
-      port: this.configService.get<number>('DB_PORT', 5432),
-      username: this.configService.get<string>('DB_USERNAME', 'postgres'),
-      password: this.configService.get<string>('DB_PASSWORD', 'password'),
-      database: this.configService.get<string>('DB_NAME', 'payment_processing'),
-      entities: [__dirname + '/../**/*.entity.js'],
-      migrations: [__dirname + '/../migrations/*{.ts,.js}'],
-      synchronize: this.configService.get<boolean>('DB_SYNCHRONIZE', false),
-      logging: this.configService.get<boolean>('DB_LOGGING', false),
-      ssl: false,
+      host,
+      port,
+      username,
+      password,
+      database,
+      // Rely on Nest autoLoadEntities to register entity classes, avoid requiring files via globs
+      entities: [],
+      // Only load compiled migrations at runtime
+      migrations: [__dirname + '/../migrations/*{.js}'],
+      synchronize,
+      logging,
+      ssl,
       retryAttempts: 1,
       retryDelay: 1000,
       autoLoadEntities: true,
       extra: {
-        max: this.configService.get<number>('DB_MAX_CONNECTIONS', 10),
-        idleTimeoutMillis: this.configService.get<number>(
-          'DB_IDLE_TIMEOUT',
-          30000,
-        ),
-        connectionTimeoutMillis: this.configService.get<number>(
-          'DB_CONNECTION_TIMEOUT',
-          2000,
-        ),
+        max,
+        idleTimeoutMillis,
+        connectionTimeoutMillis,
       },
     };
   }
@@ -50,12 +80,13 @@ export class DatabaseConfig implements TypeOrmOptionsFactory {
 export const AppDataSource = new DataSource({
   type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432'),
+  port: Number(process.env.DB_PORT || 5432),
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'password',
   database: process.env.DB_NAME || 'payment_processing',
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migrations/*{.ts,.js}'],
   synchronize: false,
-  logging: process.env.DB_LOGGING === 'true',
+  logging: (process.env.DB_LOGGING || '').toLowerCase() === 'true',
+  ssl: (process.env.DB_SSL || '').toLowerCase() === 'true',
 });

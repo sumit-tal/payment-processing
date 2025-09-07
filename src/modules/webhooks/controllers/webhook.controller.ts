@@ -30,7 +30,7 @@ import {
   ProcessWebhookEventDto,
   RetryWebhookEventDto,
 } from '../dto/webhook-event.dto';
-import { WebhookEvent } from '../entities/webhook-event.entity';
+import { WebhookEvent } from '@/database/entities/webhook-event.entity';
 
 @ApiTags('Webhooks')
 @Controller('webhooks')

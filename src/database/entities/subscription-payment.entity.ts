@@ -8,7 +8,14 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { IsUUID, IsString, IsNumber, IsEnum, IsOptional, IsDate } from 'class-validator';
+import {
+  IsUUID,
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsDate,
+} from 'class-validator';
 import { Subscription } from './subscription.entity';
 import { Transaction } from './transaction.entity';
 

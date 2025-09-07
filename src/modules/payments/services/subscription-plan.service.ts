@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SubscriptionPlan, SubscriptionPlanStatus } from '../entities/subscription-plan.entity';
+import { SubscriptionPlan, SubscriptionPlanStatus } from '@/database/entities/subscription-plan.entity';
 import { CreateSubscriptionPlanDto, UpdateSubscriptionPlanDto } from '../dto/subscription-plan.dto';
 
 @Injectable()

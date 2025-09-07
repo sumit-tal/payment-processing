@@ -1,7 +1,7 @@
 import { IsString, IsNumber, IsOptional, IsUUID, IsEnum, ValidateNested, Min, Max, Length } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PaymentMethodType } from '../entities';
+import { PaymentMethodType } from '@/database/entities';
 
 export class BillingAddressDto {
   @ApiPropertyOptional({ description: 'First name' })

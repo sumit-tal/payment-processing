@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumber, IsEnum, IsOptional, IsBoolean, Min, Max } from 'class-validator';
-import { BillingInterval, SubscriptionPlanStatus } from '../entities/subscription-plan.entity';
+import { BillingInterval, SubscriptionPlanStatus } from '@/database/entities/subscription-plan.entity';
 
 export class CreateSubscriptionPlanDto {
   @ApiProperty({ description: 'Unique name for the subscription plan' })

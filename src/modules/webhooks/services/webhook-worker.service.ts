@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { WebhookService } from './webhook.service';
 import { SqsService, SqsMessage, SqsMessagePayload } from './sqs.service';
-import { WebhookEventType, WebhookEventStatus } from '../entities/webhook-event.entity';
+import { WebhookEventType, WebhookEventStatus } from '@/database/entities/webhook-event.entity';
 
 @Injectable()
 export class WebhookWorkerService implements OnModuleInit, OnModuleDestroy {

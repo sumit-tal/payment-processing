@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ApiKey } from './entities/api-key.entity';
+import { ApiKey } from '@/database/entities/api-key.entity';
 import { ApiKeyService } from './services/api-key.service';
 import { ApiKeyController } from './controllers/api-key.controller';
 import { SecurityModule } from '../security/security.module';

@@ -2,7 +2,7 @@ import { Injectable, Logger, ConflictException, NotFoundException, BadRequestExc
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { randomUUID } from 'crypto';
-import { Transaction, TransactionType, TransactionStatus } from '../entities';
+import { Transaction, TransactionType, TransactionStatus } from '@/database/entities';
 import { CreatePaymentDto, CapturePaymentDto, RefundPaymentDto, CancelPaymentDto } from '../dto';
 import { AuthorizeNetService, PaymentResult } from './authorizenet.service';
 import { LoggingService } from '../../observability/services/logging.service';

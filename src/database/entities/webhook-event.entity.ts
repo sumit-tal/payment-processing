@@ -32,7 +32,6 @@ export enum WebhookEventStatus {
 
 @Entity('webhook_events')
 @Index(['eventType', 'status'])
-@Index(['externalId'])
 @Index(['createdAt'])
 export class WebhookEvent {
   @PrimaryGeneratedColumn('uuid')
@@ -113,8 +112,10 @@ export class WebhookEvent {
    * Check if the webhook event can be retried
    */
   canRetry(): boolean {
-    return this.retryCount < this.maxRetries && 
-           this.status !== WebhookEventStatus.PROCESSED;
+    return (
+      this.retryCount < this.maxRetries &&
+      this.status !== WebhookEventStatus.PROCESSED
+    );
   }
 
   /**
@@ -148,8 +149,8 @@ export class WebhookEvent {
    */
   incrementRetry(): void {
     this.retryCount += 1;
-    this.status = this.canRetry() 
-      ? WebhookEventStatus.RETRYING 
+    this.status = this.canRetry()
+      ? WebhookEventStatus.RETRYING
       : WebhookEventStatus.FAILED;
   }
 }

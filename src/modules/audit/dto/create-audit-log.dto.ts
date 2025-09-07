@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean, IsNumber, IsEnum, Min } from 'class-validator';
-import { AuditAction } from '../entities/audit-log.entity';
+import { AuditAction } from '@/database/entities/audit-log.entity';
 
 export class CreateAuditLogDto {
   @IsEnum(AuditAction)

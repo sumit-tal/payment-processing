@@ -23,7 +23,7 @@ import {
   RefundPaymentDto,
   CancelPaymentDto,
 } from '../dto';
-import { Transaction } from '../entities';
+import { Transaction } from '@/database/entities';
 
 @ApiTags('payments')
 @Controller('payments')

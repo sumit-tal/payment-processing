@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindManyOptions, Between } from 'typeorm';
-import { AuditLog, AuditAction } from '../entities/audit-log.entity';
+import { AuditLog, AuditAction } from '@/database/entities/audit-log.entity';
 import { CreateAuditLogDto } from '../dto/create-audit-log.dto';
 
 export interface AuditLogFilter {

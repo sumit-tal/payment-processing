@@ -1,6 +1,6 @@
 import { Module, Global } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuditLog } from './entities/audit-log.entity';
+import { AuditLog } from '@/database/entities/audit-log.entity';
 import { AuditLogService } from './services/audit-log.service';
 import { AuditLogController } from './controllers/audit-log.controller';
 

@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { AuditLogService, AuditLogFilter } from '../services/audit-log.service';
-import { AuditLog, AuditAction } from '../entities/audit-log.entity';
+import { AuditLog, AuditAction } from '@/database/entities/audit-log.entity';
 import { ApiKeyAuthGuard } from '../../../common/guards/api-key-auth.guard';
 import { RequirePermissions, Permissions } from '../../../common/decorators/auth.decorator';
 

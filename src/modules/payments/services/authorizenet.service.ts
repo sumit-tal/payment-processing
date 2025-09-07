@@ -2,7 +2,7 @@ import { Injectable, Logger, BadRequestException, InternalServerErrorException }
 import { ConfigService } from '@nestjs/config';
 import * as AuthorizeNet from 'authorizenet';
 import { CreatePaymentDto, CapturePaymentDto, RefundPaymentDto, CancelPaymentDto } from '../dto';
-import { TransactionType } from '../entities';
+import { TransactionType } from '@/database/entities';
 
 export interface AuthorizeNetConfig {
   apiLoginId: string;

@@ -1,13 +1,13 @@
 import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ApiKey } from '../entities/api-key.entity';
+import { ApiKey } from '@/database/entities/api-key.entity';
 import { CreateApiKeyDto } from '../dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '../dto/update-api-key.dto';
 import { ApiKeyResponseDto, CreateApiKeyResponseDto } from '../dto/api-key-response.dto';
 import { CryptoService } from '../../security/services/crypto.service';
 import { AuditLogService } from '../../audit/services/audit-log.service';
-import { AuditAction } from '../../audit/entities/audit-log.entity';
+import { AuditAction } from '@/database/entities/audit-log.entity';
 import * as crypto from 'crypto';
 
 @Injectable()

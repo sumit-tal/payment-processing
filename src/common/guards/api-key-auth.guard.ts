@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { ApiKeyService } from '../../modules/auth/services/api-key.service';
 import { AuditLogService } from '../../modules/audit/services/audit-log.service';
-import { AuditAction } from '../../modules/audit/entities/audit-log.entity';
+import { AuditAction } from '@/database/entities/audit-log.entity';
 import { PERMISSIONS_KEY, SKIP_AUTH_KEY } from '../decorators/auth.decorator';
 
 @Injectable()

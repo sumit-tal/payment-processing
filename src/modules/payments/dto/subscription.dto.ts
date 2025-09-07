@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsUUID, IsEnum, IsOptional, IsDateString } from 'class-validator';
-import { SubscriptionStatus } from '../entities/subscription.entity';
+import { SubscriptionStatus } from '@/database/entities/subscription.entity';
 
 export class CreateSubscriptionDto {
   @ApiProperty({ description: 'Customer ID' })

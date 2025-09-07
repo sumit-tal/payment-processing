@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { Request } from 'express';
 import { AuditLogService } from '../../modules/audit/services/audit-log.service';
-import { AuditAction } from '../../modules/audit/entities/audit-log.entity';
+import { AuditAction } from '@/database/entities/audit-log.entity';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {

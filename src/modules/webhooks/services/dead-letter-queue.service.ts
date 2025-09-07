@@ -9,7 +9,7 @@ import {
   SendMessageCommand,
   GetQueueAttributesCommand,
 } from '@aws-sdk/client-sqs';
-import { WebhookEvent, WebhookEventStatus } from '../entities/webhook-event.entity';
+import { WebhookEvent, WebhookEventStatus } from '@/database/entities/webhook-event.entity';
 import { SqsService, SqsMessage, SqsMessagePayload } from './sqs.service';
 
 export interface DeadLetterQueueStats {

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TransactionStatus } from '../entities';
+import { TransactionStatus } from '@/database/entities';
 
 export class PaymentResponseDto {
   @ApiProperty({ description: 'Unique transaction identifier', format: 'uuid' })

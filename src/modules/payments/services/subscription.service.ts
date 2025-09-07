@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as AuthorizeNet from 'authorizenet';
-import { Subscription, SubscriptionStatus } from '../entities/subscription.entity';
-import { SubscriptionPlan, BillingInterval } from '../entities/subscription-plan.entity';
-import { PaymentMethod } from '../entities/payment-method.entity';
-import { SubscriptionPayment, SubscriptionPaymentStatus } from '../entities/subscription-payment.entity';
+import { Subscription, SubscriptionStatus } from '@/database/entities/subscription.entity';
+import { SubscriptionPlan, BillingInterval } from '@/database/entities/subscription-plan.entity';
+import { PaymentMethod } from '@/database/entities/payment-method.entity';
+import { SubscriptionPayment, SubscriptionPaymentStatus } from '@/database/entities/subscription-payment.entity';
 import { CreateSubscriptionDto, UpdateSubscriptionDto, CancelSubscriptionDto } from '../dto/subscription.dto';
 import { SubscriptionPlanService } from './subscription-plan.service';
 

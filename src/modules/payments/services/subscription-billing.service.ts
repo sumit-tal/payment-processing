@@ -3,12 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, LessThanOrEqual } from 'typeorm';
 // Note: @nestjs/schedule would be needed for production cron jobs
 // For now, we'll implement manual triggers and external scheduling
-import { Subscription, SubscriptionStatus } from '../entities/subscription.entity';
-import { SubscriptionPayment, SubscriptionPaymentStatus } from '../entities/subscription-payment.entity';
-import { Transaction, TransactionType, TransactionStatus } from '../entities/transaction.entity';
+import { Subscription, SubscriptionStatus } from '@/database/entities/subscription.entity';
+import { SubscriptionPayment, SubscriptionPaymentStatus } from '@/database/entities/subscription-payment.entity';
+import { Transaction, TransactionType, TransactionStatus } from '@/database/entities/transaction.entity';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from '../dto';
-import { PaymentMethodType } from '../entities';
+import { PaymentMethodType } from '@/database/entities';
 
 @Injectable()
 export class SubscriptionBillingService {

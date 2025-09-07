@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
-import { WebhookEvent, WebhookEventType, WebhookEventStatus } from '../entities/webhook-event.entity';
+import { WebhookEvent, WebhookEventType, WebhookEventStatus } from '@/database/entities/webhook-event.entity';
 import { CreateWebhookEventDto, WebhookEventQueryDto, AuthorizeNetWebhookDto } from '../dto/webhook-event.dto';
 import { WebhookValidationService } from './webhook-validation.service';
 import { SqsService, SqsMessagePayload } from './sqs.service';

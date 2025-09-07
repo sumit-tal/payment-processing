@@ -6,7 +6,13 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { IsEnum, IsUUID, IsNumber, IsString, IsOptional } from 'class-validator';
+import {
+  IsEnum,
+  IsUUID,
+  IsNumber,
+  IsString,
+  IsOptional,
+} from 'class-validator';
 
 export enum TransactionType {
   PURCHASE = 'purchase',

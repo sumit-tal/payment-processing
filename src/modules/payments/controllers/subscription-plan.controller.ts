@@ -19,7 +19,7 @@ import {
   UpdateSubscriptionPlanDto,
   SubscriptionPlanResponseDto,
 } from '../dto/subscription-plan.dto';
-import { SubscriptionPlanStatus } from '../entities/subscription-plan.entity';
+import { SubscriptionPlanStatus } from '@/database/entities/subscription-plan.entity';
 
 @ApiTags('Subscription Plans')
 @Controller('subscription-plans')

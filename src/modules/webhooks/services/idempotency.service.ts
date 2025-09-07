@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { WebhookEvent } from '../entities/webhook-event.entity';
+import { WebhookEvent } from '@/database/entities/webhook-event.entity';
 import * as crypto from 'crypto';
 
 export interface IdempotencyKey {

@@ -1,72 +1,60 @@
-import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-// Redis integration will be handled directly in services
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HealthModule } from './modules/health/health.module';
-import { PaymentsModule } from './modules/payments/payments.module';
-import { WebhooksModule } from './modules/webhooks/webhooks.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { SecurityModule } from './modules/security/security.module';
-import { AuditModule } from './modules/audit/audit.module';
-import { ObservabilityModule } from './modules/observability/observability.module';
-import { DatabaseConfig } from './config/database.config';
-import securityConfig from './config/security.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-// import { ApiKeyAuthGuard } from './common/guards/api-key-auth.guard';
-// import { AuditInterceptor } from './common/interceptors/audit.interceptor';
-import { LoggingInterceptor } from './modules/observability/interceptors/logging.interceptor';
-import { MetricsInterceptor } from './modules/observability/interceptors/metrics.interceptor';
-import { RateLimitMiddleware } from './modules/security/middleware/rate-limit.middleware';
-import { CorrelationIdMiddleware } from './modules/observability/middleware/correlation-id.middleware';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { WebhooksModule } from './modules/webhooks/webhooks.module';
+import { ObservabilityModule } from './modules/observability/observability.module';
+import { Transaction } from './database/entities/transaction.entity';
+import { ApiKey } from './database/entities/api-key.entity';
+import { AuditLog } from './database/entities/audit-log.entity';
+import { PaymentMethod } from './database/entities/payment-method.entity';
+import { SubscriptionPayment } from './database/entities/subscription-payment.entity';
+import { SubscriptionPlan } from './database/entities/subscription-plan.entity';
+import { Subscription } from './database/entities/subscription.entity';
+import { WebhookEvent } from './database/entities/webhook-event.entity';
 
 /**
- * Root application module with security, audit, and compliance features
+ * Minimal application module for testing
  */
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
-      load: [securityConfig],
     }),
-    // TypeOrmModule.forRootAsync({
-    //   useClass: DatabaseConfig,
-    // }),
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        url:
+          configService.get('DB_URL') ||
+          `postgresql://${encodeURIComponent(configService.get('DB_USERNAME', 'postgres'))}:${encodeURIComponent(configService.get('DB_PASSWORD', 'password'))}@${configService.get('DB_HOST', 'localhost')}:${configService.get('DB_PORT', 5432)}/${configService.get('DB_NAME', 'payment_processing')}`,
+        entities: [
+          Transaction,
+          ApiKey,
+          AuditLog,
+          PaymentMethod,
+          SubscriptionPayment,
+          SubscriptionPlan,
+          Subscription,
+          WebhookEvent,
+        ],
+        synchronize: configService.get('DB_SYNCHRONIZE', 'false') === 'true',
+        logging: configService.get('DB_LOGGING', 'false') === 'true',
+        poolSize: parseInt(configService.get('DB_MAX_CONNECTIONS', '10')),
+        migrations: [`${__dirname}/database/migrations/*{.ts,.js}`],
+        migrationsTableName: 'migration_history',
+      }),
+      inject: [ConfigService],
+    }),
     ObservabilityModule,
-    SecurityModule,
-    // AuditModule,
-    // AuthModule,
     HealthModule,
-    // PaymentsModule,
-    // WebhooksModule,
+    PaymentsModule,
+    WebhooksModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: ApiKeyAuthGuard,
-    // },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: AuditInterceptor,
-    // },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: MetricsInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(CorrelationIdMiddleware)
-      .forRoutes('*');
-  }
-}
+export class AppModule {}
