@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -13,8 +13,13 @@ export class CryptoService {
   private readonly encryptionKey: Buffer;
 
   constructor(private readonly configService: ConfigService) {
-    this.saltRounds = this.configService.get<number>('BCRYPT_ROUNDS', 12);
-    const secretKey = this.configService.get<string>('ENCRYPTION_KEY') || 'default-encryption-key-change-in-production';
+    this.saltRounds = parseInt(
+      this.configService.get<string>('BCRYPT_ROUNDS', '12'),
+      10,
+    );
+    const secretKey =
+      this.configService.get<string>('ENCRYPTION_KEY') ||
+      'default-encryption-key-change-in-production';
     this.encryptionKey = crypto.scryptSync(secretKey, 'salt', this.keyLength);
   }
 
@@ -22,7 +27,8 @@ export class CryptoService {
    * Hash API key using bcrypt
    */
   async hashApiKey(apiKey: string): Promise<string> {
-    return bcrypt.hash(apiKey, this.saltRounds);
+    const salt = await bcrypt.genSalt(this.saltRounds);
+    return bcrypt.hash(apiKey, salt);
   }
 
   /**
@@ -49,11 +55,15 @@ export class CryptoService {
   /**
    * Verify HMAC signature
    */
-  verifyHmacSignature(data: string, signature: string, secret: string): boolean {
+  verifyHmacSignature(
+    data: string,
+    signature: string,
+    secret: string,
+  ): boolean {
     const expectedSignature = this.generateHmacSignature(data, secret);
     return crypto.timingSafeEqual(
       Buffer.from(signature, 'hex'),
-      Buffer.from(expectedSignature, 'hex')
+      Buffer.from(expectedSignature, 'hex'),
     );
   }
 
@@ -62,33 +72,45 @@ export class CryptoService {
    */
   encrypt(text: string): { encrypted: string; iv: string; tag: string } {
     const iv = crypto.randomBytes(this.ivLength);
-    const cipher = crypto.createCipheriv(this.algorithm, this.encryptionKey, iv);
-    
+    const cipher = crypto.createCipheriv(
+      this.algorithm,
+      this.encryptionKey,
+      iv,
+    );
+
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     const tag = cipher.getAuthTag();
-    
+
     return {
       encrypted,
       iv: iv.toString('hex'),
-      tag: tag.toString('hex')
+      tag: tag.toString('hex'),
     };
   }
 
   /**
    * Decrypt sensitive data
    */
-  decrypt(encryptedData: { encrypted: string; iv: string; tag: string }): string {
+  decrypt(encryptedData: {
+    encrypted: string;
+    iv: string;
+    tag: string;
+  }): string {
     const iv = Buffer.from(encryptedData.iv, 'hex');
     const tag = Buffer.from(encryptedData.tag, 'hex');
-    
-    const decipher = crypto.createDecipheriv(this.algorithm, this.encryptionKey, iv);
+
+    const decipher = crypto.createDecipheriv(
+      this.algorithm,
+      this.encryptionKey,
+      iv,
+    );
     decipher.setAuthTag(tag);
-    
+
     let decrypted = decipher.update(encryptedData.encrypted, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
@@ -96,7 +118,8 @@ export class CryptoService {
    * Hash password using bcrypt
    */
   async hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, this.saltRounds);
+    const salt = await bcrypt.genSalt(this.saltRounds);
+    return bcrypt.hash(password, salt);
   }
 
   /**
@@ -120,11 +143,11 @@ export class CryptoService {
     if (!data || data.length <= visibleChars * 2) {
       return '*'.repeat(data?.length || 8);
     }
-    
+
     const start = data.substring(0, visibleChars);
     const end = data.substring(data.length - visibleChars);
-    const middle = '*'.repeat(data.length - (visibleChars * 2));
-    
+    const middle = '*'.repeat(data.length - visibleChars * 2);
+
     return `${start}${middle}${end}`;
   }
 
@@ -142,7 +165,7 @@ export class CryptoService {
     const actualChecksum = this.generateChecksum(data);
     return crypto.timingSafeEqual(
       Buffer.from(actualChecksum, 'hex'),
-      Buffer.from(expectedChecksum, 'hex')
+      Buffer.from(expectedChecksum, 'hex'),
     );
   }
 }

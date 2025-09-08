@@ -60,6 +60,9 @@ export class ApiKeyAuthGuard implements CanActivate {
         [context.getHandler(), context.getClass()],
       );
 
+      console.log(requiredPermissions);
+      console.log(apiKeyEntity.permissions);
+
       if (requiredPermissions && requiredPermissions.length > 0) {
         const hasPermission = requiredPermissions.every(
           permission =>

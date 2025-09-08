@@ -1,10 +1,18 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ApiKey } from '@/database/entities/api-key.entity';
 import { CreateApiKeyDto } from '../dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '../dto/update-api-key.dto';
-import { ApiKeyResponseDto, CreateApiKeyResponseDto } from '../dto/api-key-response.dto';
+import {
+  ApiKeyResponseDto,
+  CreateApiKeyResponseDto,
+} from '../dto/api-key-response.dto';
 import { CryptoService } from '../../security/services/crypto.service';
 import { AuditLogService } from '../../audit/services/audit-log.service';
 import { AuditAction } from '@/database/entities/audit-log.entity';
@@ -19,14 +27,18 @@ export class ApiKeyService {
     private readonly auditLogService: AuditLogService,
   ) {}
 
-  async createApiKey(createApiKeyDto: CreateApiKeyDto): Promise<CreateApiKeyResponseDto> {
+  async createApiKey(
+    createApiKeyDto: CreateApiKeyDto,
+  ): Promise<CreateApiKeyResponseDto> {
     // Check if client ID already exists
     const existingApiKey = await this.apiKeyRepository.findOne({
-      where: { clientId: createApiKeyDto.clientId }
+      where: { clientId: createApiKeyDto.clientId },
     });
 
     if (existingApiKey) {
-      throw new ConflictException(`API key for client ID '${createApiKeyDto.clientId}' already exists`);
+      throw new ConflictException(
+        `API key for client ID '${createApiKeyDto.clientId}' already exists`,
+      );
     }
 
     // Generate secure API key
@@ -42,7 +54,9 @@ export class ApiKeyService {
       keyPrefix,
       permissions: createApiKeyDto.permissions || [],
       rateLimit: createApiKeyDto.rateLimit || 1000,
-      expiresAt: createApiKeyDto.expiresAt ? new Date(createApiKeyDto.expiresAt) : null,
+      expiresAt: createApiKeyDto.expiresAt
+        ? new Date(createApiKeyDto.expiresAt)
+        : null,
       createdBy: createApiKeyDto.createdBy,
       metadata: createApiKeyDto.metadata || {},
     });
@@ -73,31 +87,36 @@ export class ApiKeyService {
       return null;
     }
 
-    const keyHash = await this.cryptoService.hashApiKey(apiKey);
-    const apiKeyEntity = await this.apiKeyRepository.findOne({
-      where: { keyHash, isActive: true }
+    // Find all active API keys
+    const activeApiKeys = await this.apiKeyRepository.find({
+      where: { isActive: true },
     });
 
-    if (!apiKeyEntity) {
-      return null;
+    // Check each API key hash
+    for (const apiKeyEntity of activeApiKeys) {
+      const isValid = await this.cryptoService.verifyApiKey(apiKey, apiKeyEntity.keyHash);
+      
+      if (isValid) {
+        // Check if API key has expired
+        if (apiKeyEntity.expiresAt && apiKeyEntity.expiresAt < new Date()) {
+          return null;
+        }
+
+        // Update last used timestamp
+        await this.apiKeyRepository.update(apiKeyEntity.id, {
+          lastUsedAt: new Date(),
+        });
+
+        return apiKeyEntity;
+      }
     }
 
-    // Check if API key has expired
-    if (apiKeyEntity.expiresAt && apiKeyEntity.expiresAt < new Date()) {
-      return null;
-    }
-
-    // Update last used timestamp
-    await this.apiKeyRepository.update(apiKeyEntity.id, {
-      lastUsedAt: new Date(),
-    });
-
-    return apiKeyEntity;
+    return null;
   }
 
   async findAllApiKeys(): Promise<ApiKeyResponseDto[]> {
     const apiKeys = await this.apiKeyRepository.find({
-      order: { createdAt: 'DESC' }
+      order: { createdAt: 'DESC' },
     });
 
     return apiKeys.map(apiKey => this.mapToResponseDto(apiKey));
@@ -105,7 +124,7 @@ export class ApiKeyService {
 
   async findApiKeyById(id: string): Promise<ApiKeyResponseDto> {
     const apiKey = await this.apiKeyRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!apiKey) {
@@ -115,9 +134,13 @@ export class ApiKeyService {
     return this.mapToResponseDto(apiKey);
   }
 
-  async updateApiKey(id: string, updateApiKeyDto: UpdateApiKeyDto, updatedBy: string): Promise<ApiKeyResponseDto> {
+  async updateApiKey(
+    id: string,
+    updateApiKeyDto: UpdateApiKeyDto,
+    updatedBy: string,
+  ): Promise<ApiKeyResponseDto> {
     const apiKey = await this.apiKeyRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!apiKey) {
@@ -127,7 +150,9 @@ export class ApiKeyService {
     // Update fields
     Object.assign(apiKey, {
       ...updateApiKeyDto,
-      expiresAt: updateApiKeyDto.expiresAt ? new Date(updateApiKeyDto.expiresAt) : apiKey.expiresAt,
+      expiresAt: updateApiKeyDto.expiresAt
+        ? new Date(updateApiKeyDto.expiresAt)
+        : apiKey.expiresAt,
     });
 
     const updatedApiKey = await this.apiKeyRepository.save(apiKey);
@@ -149,7 +174,7 @@ export class ApiKeyService {
 
   async deactivateApiKey(id: string, deactivatedBy: string): Promise<void> {
     const apiKey = await this.apiKeyRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!apiKey) {
@@ -172,7 +197,7 @@ export class ApiKeyService {
 
   async deleteApiKey(id: string, deletedBy: string): Promise<void> {
     const apiKey = await this.apiKeyRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!apiKey) {

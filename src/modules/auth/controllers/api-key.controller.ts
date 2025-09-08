@@ -1,11 +1,36 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { ApiKeyService } from '../services/api-key.service';
 import { CreateApiKeyDto } from '../dto/create-api-key.dto';
 import { UpdateApiKeyDto } from '../dto/update-api-key.dto';
-import { ApiKeyResponseDto, CreateApiKeyResponseDto } from '../dto/api-key-response.dto';
+import {
+  ApiKeyResponseDto,
+  CreateApiKeyResponseDto,
+} from '../dto/api-key-response.dto';
 import { ApiKeyAuthGuard } from '../../../common/guards/api-key-auth.guard';
-import { RequirePermissions, Permissions } from '../../../common/decorators/auth.decorator';
+import {
+  RequirePermissions,
+  Permissions,
+  SkipAuth,
+} from '../../../common/decorators/auth.decorator';
 
 @ApiTags('API Keys')
 @Controller('api-keys')
@@ -15,6 +40,7 @@ export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
   @Post()
+  @SkipAuth()
   @RequirePermissions(Permissions.ADMIN_API_KEYS)
   @ApiOperation({ summary: 'Create a new API key' })
   @ApiResponse({
@@ -24,7 +50,9 @@ export class ApiKeyController {
   })
   @ApiResponse({ status: 400, description: 'Invalid input data' })
   @ApiResponse({ status: 409, description: 'Client ID already exists' })
-  async createApiKey(@Body() createApiKeyDto: CreateApiKeyDto): Promise<CreateApiKeyResponseDto> {
+  async createApiKey(
+    @Body() createApiKeyDto: CreateApiKeyDto,
+  ): Promise<CreateApiKeyResponseDto> {
     return this.apiKeyService.createApiKey(createApiKeyDto);
   }
 
