@@ -1,13 +1,31 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as AuthorizeNet from 'authorizenet';
-import { Subscription, SubscriptionStatus } from '@/database/entities/subscription.entity';
-import { SubscriptionPlan, BillingInterval } from '@/database/entities/subscription-plan.entity';
+import {
+  Subscription,
+  SubscriptionStatus,
+} from '@/database/entities/subscription.entity';
+import {
+  SubscriptionPlan,
+  BillingInterval,
+} from '@/database/entities/subscription-plan.entity';
 import { PaymentMethod } from '@/database/entities/payment-method.entity';
-import { SubscriptionPayment, SubscriptionPaymentStatus } from '@/database/entities/subscription-payment.entity';
-import { CreateSubscriptionDto, UpdateSubscriptionDto, CancelSubscriptionDto } from '../dto/subscription.dto';
+import {
+  SubscriptionPayment,
+  SubscriptionPaymentStatus,
+} from '@/database/entities/subscription-payment.entity';
+import {
+  CreateSubscriptionDto,
+  UpdateSubscriptionDto,
+  CancelSubscriptionDto,
+} from '../dto/subscription.dto';
 import { SubscriptionPlanService } from './subscription-plan.service';
 
 export interface SubscriptionResult {
@@ -44,11 +62,15 @@ export class SubscriptionService {
   ) {
     this.apiContracts = AuthorizeNet.APIContracts;
     this.apiControllers = AuthorizeNet.APIControllers;
-    
+
     this.config = {
       apiLoginId: this.configService.get<string>('AUTHORIZENET_API_LOGIN_ID'),
-      transactionKey: this.configService.get<string>('AUTHORIZENET_TRANSACTION_KEY'),
-      environment: this.configService.get<string>('AUTHORIZENET_ENVIRONMENT') as 'sandbox' | 'production',
+      transactionKey: this.configService.get<string>(
+        'AUTHORIZENET_TRANSACTION_KEY',
+      ),
+      environment: this.configService.get<string>(
+        'AUTHORIZENET_ENVIRONMENT',
+      ) as 'sandbox' | 'production',
     };
 
     this.validateConfig();
@@ -61,71 +83,94 @@ export class SubscriptionService {
   }
 
   private createMerchantAuth(): any {
-    const merchantAuthenticationType = new this.apiContracts.MerchantAuthenticationType();
+    const merchantAuthenticationType =
+      new this.apiContracts.MerchantAuthenticationType();
     merchantAuthenticationType.setName(this.config.apiLoginId);
     merchantAuthenticationType.setTransactionKey(this.config.transactionKey);
     return merchantAuthenticationType;
   }
 
-  private mapBillingIntervalToAuthorizeNet(interval: BillingInterval, count: number): any {
-    const paymentScheduleInterval = new this.apiContracts.PaymentScheduleType.Interval();
-    
+  private mapBillingIntervalToAuthorizeNet(
+    interval: BillingInterval,
+    count: number,
+  ): any {
+    const paymentScheduleInterval =
+      new this.apiContracts.PaymentScheduleType.Interval();
+
     switch (interval) {
       case BillingInterval.DAILY:
         paymentScheduleInterval.setLength(count);
-        paymentScheduleInterval.setUnit(this.apiContracts.ARBSubscriptionUnitEnum.DAYS);
+        paymentScheduleInterval.setUnit(
+          this.apiContracts.ARBSubscriptionUnitEnum.DAYS,
+        );
         break;
       case BillingInterval.WEEKLY:
         paymentScheduleInterval.setLength(count * 7);
-        paymentScheduleInterval.setUnit(this.apiContracts.ARBSubscriptionUnitEnum.DAYS);
+        paymentScheduleInterval.setUnit(
+          this.apiContracts.ARBSubscriptionUnitEnum.DAYS,
+        );
         break;
       case BillingInterval.MONTHLY:
         paymentScheduleInterval.setLength(count);
-        paymentScheduleInterval.setUnit(this.apiContracts.ARBSubscriptionUnitEnum.MONTHS);
+        paymentScheduleInterval.setUnit(
+          this.apiContracts.ARBSubscriptionUnitEnum.MONTHS,
+        );
         break;
       case BillingInterval.QUARTERLY:
         paymentScheduleInterval.setLength(count * 3);
-        paymentScheduleInterval.setUnit(this.apiContracts.ARBSubscriptionUnitEnum.MONTHS);
+        paymentScheduleInterval.setUnit(
+          this.apiContracts.ARBSubscriptionUnitEnum.MONTHS,
+        );
         break;
       case BillingInterval.YEARLY:
         paymentScheduleInterval.setLength(count * 12);
-        paymentScheduleInterval.setUnit(this.apiContracts.ARBSubscriptionUnitEnum.MONTHS);
+        paymentScheduleInterval.setUnit(
+          this.apiContracts.ARBSubscriptionUnitEnum.MONTHS,
+        );
         break;
       default:
-        throw new BadRequestException(`Unsupported billing interval: ${interval}`);
+        throw new BadRequestException(
+          `Unsupported billing interval: ${interval}`,
+        );
     }
-    
+
     return paymentScheduleInterval;
   }
 
-  private calculateNextBillingDate(startDate: Date, interval: BillingInterval, count: number): Date {
+  private calculateNextBillingDate(
+    startDate: Date,
+    interval: BillingInterval,
+    count: number,
+  ): Date {
     const nextDate = new Date(startDate);
-    
+
     switch (interval) {
       case BillingInterval.DAILY:
         nextDate.setDate(nextDate.getDate() + count);
         break;
       case BillingInterval.WEEKLY:
-        nextDate.setDate(nextDate.getDate() + (count * 7));
+        nextDate.setDate(nextDate.getDate() + count * 7);
         break;
       case BillingInterval.MONTHLY:
         nextDate.setMonth(nextDate.getMonth() + count);
         break;
       case BillingInterval.QUARTERLY:
-        nextDate.setMonth(nextDate.getMonth() + (count * 3));
+        nextDate.setMonth(nextDate.getMonth() + count * 3);
         break;
       case BillingInterval.YEARLY:
         nextDate.setFullYear(nextDate.getFullYear() + count);
         break;
     }
-    
+
     return nextDate;
   }
 
   private executeARBRequest(request: any): Promise<SubscriptionResult> {
-    return new Promise((resolve) => {
-      const ctrl = new this.apiControllers.ARBCreateSubscriptionController(request.getJSON());
-      
+    return new Promise(resolve => {
+      const ctrl = new this.apiControllers.ARBCreateSubscriptionController(
+        request.getJSON(),
+      );
+
       if (this.config.environment === 'sandbox') {
         ctrl.setEnvironment(AuthorizeNet.Constants.endpoint.sandbox);
       } else {
@@ -134,11 +179,18 @@ export class SubscriptionService {
 
       ctrl.execute(() => {
         const apiResponse = ctrl.getResponse();
-        const response = new this.apiContracts.ARBCreateSubscriptionResponse(apiResponse);
-        
-        this.logger.debug('Authorize.Net ARB Response', { response: apiResponse });
+        const response = new this.apiContracts.ARBCreateSubscriptionResponse(
+          apiResponse,
+        );
 
-        if (response.getMessages().getResultCode() === this.apiContracts.MessageTypeEnum.OK) {
+        this.logger.debug('Authorize.Net ARB Response', {
+          response: apiResponse,
+        });
+
+        if (
+          response.getMessages().getResultCode() ===
+          this.apiContracts.MessageTypeEnum.OK
+        ) {
           resolve({
             success: true,
             gatewaySubscriptionId: response.getSubscriptionId(),
@@ -159,8 +211,12 @@ export class SubscriptionService {
   /**
    * Create a new subscription
    */
-  async createSubscription(createSubscriptionDto: CreateSubscriptionDto): Promise<Subscription> {
-    this.logger.log(`Creating subscription for customer: ${createSubscriptionDto.customerId}`);
+  async createSubscription(
+    createSubscriptionDto: CreateSubscriptionDto,
+  ): Promise<Subscription> {
+    this.logger.log(
+      `Creating subscription for customer: ${createSubscriptionDto.customerId}`,
+    );
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -168,14 +224,20 @@ export class SubscriptionService {
 
     try {
       // Validate subscription plan
-      const subscriptionPlan = await this.subscriptionPlanService.findPlanById(createSubscriptionDto.subscriptionPlanId);
-      if (!await this.subscriptionPlanService.isPlanAvailable(subscriptionPlan.id)) {
+      const subscriptionPlan = await this.subscriptionPlanService.findPlanById(
+        createSubscriptionDto.subscriptionPlanId,
+      );
+      if (
+        !(await this.subscriptionPlanService.isPlanAvailable(
+          subscriptionPlan.id,
+        ))
+      ) {
         throw new BadRequestException('Subscription plan is not available');
       }
 
       // Validate payment method
       const paymentMethod = await this.paymentMethodRepository.findOne({
-        where: { 
+        where: {
           id: createSubscriptionDto.paymentMethodId,
           customerId: createSubscriptionDto.customerId,
           isActive: true,
@@ -187,19 +249,37 @@ export class SubscriptionService {
       }
 
       // Calculate subscription dates
-      const startDate = createSubscriptionDto.startDate ? new Date(createSubscriptionDto.startDate) : new Date();
-      const trialEnd = createSubscriptionDto.trialEnd ? new Date(createSubscriptionDto.trialEnd) : 
-        (subscriptionPlan.trialPeriodDays ? new Date(startDate.getTime() + subscriptionPlan.trialPeriodDays * 24 * 60 * 60 * 1000) : null);
-      
+      const startDate = createSubscriptionDto.startDate
+        ? new Date(createSubscriptionDto.startDate)
+        : new Date();
+      const trialEnd = createSubscriptionDto.trialEnd
+        ? new Date(createSubscriptionDto.trialEnd)
+        : subscriptionPlan.trialPeriodDays
+          ? new Date(
+              startDate.getTime() +
+                subscriptionPlan.trialPeriodDays * 24 * 60 * 60 * 1000,
+            )
+          : null;
+
       const billingStartDate = trialEnd || startDate;
-      const nextBillingDate = this.calculateNextBillingDate(billingStartDate, subscriptionPlan.billingInterval, subscriptionPlan.billingIntervalCount);
+      const nextBillingDate = this.calculateNextBillingDate(
+        billingStartDate,
+        subscriptionPlan.billingInterval,
+        subscriptionPlan.billingIntervalCount,
+      );
       const currentPeriodEnd = new Date(nextBillingDate);
 
       // Create Authorize.Net ARB subscription
-      const arbResult = await this.createARBSubscription(subscriptionPlan, paymentMethod, billingStartDate);
-      
+      const arbResult = await this.createARBSubscription(
+        subscriptionPlan,
+        paymentMethod,
+        billingStartDate,
+      );
+
       if (!arbResult.success) {
-        throw new BadRequestException(`Failed to create subscription: ${arbResult.errorMessage}`);
+        throw new BadRequestException(
+          `Failed to create subscription: ${arbResult.errorMessage}`,
+        );
       }
 
       // Create subscription record
@@ -223,12 +303,17 @@ export class SubscriptionService {
       const savedSubscription = await queryRunner.manager.save(subscription);
 
       await queryRunner.commitTransaction();
-      
-      this.logger.log(`Successfully created subscription with ID: ${savedSubscription.id}`);
+
+      this.logger.log(
+        `Successfully created subscription with ID: ${savedSubscription.id}`,
+      );
       return savedSubscription;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Failed to create subscription: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create subscription: ${error.message}`,
+        error.stack,
+      );
       throw error;
     } finally {
       await queryRunner.release();
@@ -243,11 +328,14 @@ export class SubscriptionService {
     const merchantAuthenticationType = this.createMerchantAuth();
 
     // Create payment schedule
-    const interval = this.mapBillingIntervalToAuthorizeNet(plan.billingInterval, plan.billingIntervalCount);
+    const interval = this.mapBillingIntervalToAuthorizeNet(
+      plan.billingInterval,
+      plan.billingIntervalCount,
+    );
     const paymentSchedule = new this.apiContracts.PaymentScheduleType();
     paymentSchedule.setInterval(interval);
     paymentSchedule.setStartDate(startDate.toISOString().split('T')[0]);
-    
+
     if (plan.maxBillingCycles) {
       paymentSchedule.setTotalOccurrences(plan.maxBillingCycles);
     } else {
@@ -260,9 +348,17 @@ export class SubscriptionService {
     arbSubscription.setPaymentSchedule(paymentSchedule);
     arbSubscription.setAmount(plan.amount);
 
-    // Set payment method (assuming stored payment profile)
+    // Set payment method (split the combined ID format: customerProfileId|customerPaymentProfileId)
+    const [customerProfileId, customerPaymentProfileId] =
+      paymentMethod.gatewayPaymentMethodId.split('|');
+
+    if (!customerProfileId || !customerPaymentProfileId) {
+      throw new BadRequestException('Invalid payment method ID format');
+    }
+
     const profile = new this.apiContracts.CustomerProfileIdType();
-    profile.setCustomerProfileId(paymentMethod.gatewayPaymentMethodId);
+    profile.setCustomerProfileId(customerProfileId);
+    profile.setCustomerPaymentProfileId(customerPaymentProfileId);
     arbSubscription.setProfile(profile);
 
     const request = new this.apiContracts.ARBCreateSubscriptionRequest();
@@ -293,7 +389,9 @@ export class SubscriptionService {
   /**
    * Get subscriptions by customer ID
    */
-  async findSubscriptionsByCustomer(customerId: string): Promise<Subscription[]> {
+  async findSubscriptionsByCustomer(
+    customerId: string,
+  ): Promise<Subscription[]> {
     this.logger.log(`Retrieving subscriptions for customer: ${customerId}`);
 
     return await this.subscriptionRepository.find({
@@ -306,7 +404,10 @@ export class SubscriptionService {
   /**
    * Update subscription
    */
-  async updateSubscription(id: string, updateSubscriptionDto: UpdateSubscriptionDto): Promise<Subscription> {
+  async updateSubscription(
+    id: string,
+    updateSubscriptionDto: UpdateSubscriptionDto,
+  ): Promise<Subscription> {
     this.logger.log(`Updating subscription with ID: ${id}`);
 
     const subscription = await this.findSubscriptionById(id);
@@ -314,7 +415,7 @@ export class SubscriptionService {
     // Update allowed fields
     if (updateSubscriptionDto.paymentMethodId) {
       const paymentMethod = await this.paymentMethodRepository.findOne({
-        where: { 
+        where: {
           id: updateSubscriptionDto.paymentMethodId,
           customerId: subscription.customerId,
           isActive: true,
@@ -333,11 +434,15 @@ export class SubscriptionService {
     }
 
     if (updateSubscriptionDto.metadata) {
-      subscription.metadata = { ...subscription.metadata, ...updateSubscriptionDto.metadata };
+      subscription.metadata = {
+        ...subscription.metadata,
+        ...updateSubscriptionDto.metadata,
+      };
     }
 
-    const updatedSubscription = await this.subscriptionRepository.save(subscription);
-    
+    const updatedSubscription =
+      await this.subscriptionRepository.save(subscription);
+
     this.logger.log(`Successfully updated subscription with ID: ${id}`);
     return updatedSubscription;
   }
@@ -345,7 +450,10 @@ export class SubscriptionService {
   /**
    * Cancel subscription
    */
-  async cancelSubscription(id: string, cancelDto: CancelSubscriptionDto): Promise<Subscription> {
+  async cancelSubscription(
+    id: string,
+    cancelDto: CancelSubscriptionDto,
+  ): Promise<Subscription> {
     this.logger.log(`Cancelling subscription with ID: ${id}`);
 
     const subscription = await this.findSubscriptionById(id);
@@ -360,7 +468,7 @@ export class SubscriptionService {
     // Update subscription status
     subscription.status = SubscriptionStatus.CANCELLED;
     subscription.cancelledAt = new Date();
-    
+
     if (cancelDto.cancelImmediately) {
       subscription.endedAt = new Date();
     } else {
@@ -374,13 +482,16 @@ export class SubscriptionService {
       };
     }
 
-    const cancelledSubscription = await this.subscriptionRepository.save(subscription);
-    
+    const cancelledSubscription =
+      await this.subscriptionRepository.save(subscription);
+
     this.logger.log(`Successfully cancelled subscription with ID: ${id}`);
     return cancelledSubscription;
   }
 
-  private async cancelARBSubscription(gatewaySubscriptionId: string): Promise<void> {
+  private async cancelARBSubscription(
+    gatewaySubscriptionId: string,
+  ): Promise<void> {
     const merchantAuthenticationType = this.createMerchantAuth();
 
     const request = new this.apiContracts.ARBCancelSubscriptionRequest();
@@ -388,8 +499,10 @@ export class SubscriptionService {
     request.setSubscriptionId(gatewaySubscriptionId);
 
     return new Promise((resolve, reject) => {
-      const ctrl = new this.apiControllers.ARBCancelSubscriptionController(request.getJSON());
-      
+      const ctrl = new this.apiControllers.ARBCancelSubscriptionController(
+        request.getJSON(),
+      );
+
       if (this.config.environment === 'sandbox') {
         ctrl.setEnvironment(AuthorizeNet.Constants.endpoint.sandbox);
       } else {
@@ -398,13 +511,22 @@ export class SubscriptionService {
 
       ctrl.execute(() => {
         const apiResponse = ctrl.getResponse();
-        const response = new this.apiContracts.ARBCancelSubscriptionResponse(apiResponse);
-        
-        if (response.getMessages().getResultCode() === this.apiContracts.MessageTypeEnum.OK) {
+        const response = new this.apiContracts.ARBCancelSubscriptionResponse(
+          apiResponse,
+        );
+
+        if (
+          response.getMessages().getResultCode() ===
+          this.apiContracts.MessageTypeEnum.OK
+        ) {
           resolve();
         } else {
           const errorMessage = response.getMessages().getMessage()[0].getText();
-          reject(new BadRequestException(`Failed to cancel subscription in gateway: ${errorMessage}`));
+          reject(
+            new BadRequestException(
+              `Failed to cancel subscription in gateway: ${errorMessage}`,
+            ),
+          );
         }
       });
     });
@@ -415,7 +537,7 @@ export class SubscriptionService {
    */
   async getSubscriptionsDueForBilling(): Promise<Subscription[]> {
     const now = new Date();
-    
+
     return await this.subscriptionRepository.find({
       where: {
         status: SubscriptionStatus.ACTIVE,
