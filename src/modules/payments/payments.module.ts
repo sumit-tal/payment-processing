@@ -13,9 +13,11 @@ import {
   AuthorizeNetService, 
   SubscriptionPlanService, 
   SubscriptionService, 
-  SubscriptionBillingService 
+  SubscriptionBillingService,
+  PaymentMethodService 
 } from './services';
 import { PaymentController } from './controllers';
+import { PaymentMethodController } from './controllers/payment-method.controller';
 import { SubscriptionPlanController } from './controllers/subscription-plan.controller';
 import { SubscriptionController } from './controllers/subscription.controller';
 
@@ -34,6 +36,7 @@ import { SubscriptionController } from './controllers/subscription.controller';
     PaymentController,
     SubscriptionPlanController,
     SubscriptionController,
+    PaymentMethodController,
   ],
   providers: [
     PaymentService, 
@@ -41,6 +44,7 @@ import { SubscriptionController } from './controllers/subscription.controller';
     SubscriptionPlanService,
     SubscriptionService,
     SubscriptionBillingService,
+    PaymentMethodService,
   ],
   exports: [
     PaymentService, 
@@ -48,6 +52,7 @@ import { SubscriptionController } from './controllers/subscription.controller';
     SubscriptionPlanService,
     SubscriptionService,
     SubscriptionBillingService,
+    PaymentMethodService,
   ],
 })
 export class PaymentsModule {}
