@@ -126,6 +126,15 @@ export class WebhookValidationService {
   validateTimestamp(eventDate: string, toleranceMinutes: number = 5): WebhookValidationResult {
     try {
       const eventTimestamp = new Date(eventDate);
+      
+      // Check if the date is invalid
+      if (isNaN(eventTimestamp.getTime())) {
+        return {
+          isValid: false,
+          errorMessage: 'Invalid timestamp format',
+        };
+      }
+      
       const currentTimestamp = new Date();
       const timeDifference = Math.abs(currentTimestamp.getTime() - eventTimestamp.getTime());
       const toleranceMs = toleranceMinutes * 60 * 1000;

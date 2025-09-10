@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuditLogService } from './audit-log.service';
-import { AuditLog, AuditAction } from '../entities/audit-log.entity';
+import { AuditLog, AuditAction } from '@/database/entities/audit-log.entity';
 import { CreateAuditLogDto } from '../dto/create-audit-log.dto';
 
 describe('AuditLogService', () => {
@@ -71,13 +71,17 @@ describe('AuditLogService', () => {
       mockRepository.save.mockRejectedValue(new Error('Database error'));
 
       // Should not throw error
-      await expect(service.logActivity(createAuditLogDto)).resolves.toBeUndefined();
+      await expect(
+        service.logActivity(createAuditLogDto),
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('logPaymentActivity', () => {
     it('should log payment activity with correct parameters', async () => {
-      const spy = jest.spyOn(service, 'logActivity').mockResolvedValue(undefined);
+      const spy = jest
+        .spyOn(service, 'logActivity')
+        .mockResolvedValue(undefined);
 
       await service.logPaymentActivity(
         AuditAction.PAYMENT_INITIATED,
@@ -86,7 +90,7 @@ describe('AuditLogService', () => {
         { amount: 100 },
         true,
         undefined,
-        500
+        500,
       );
 
       expect(spy).toHaveBeenCalledWith({
@@ -209,7 +213,7 @@ describe('AuditLogService', () => {
       expect(mockQueryBuilder.delete).toHaveBeenCalled();
       expect(mockQueryBuilder.where).toHaveBeenCalledWith(
         'createdAt < :cutoffDate',
-        { cutoffDate: expect.any(Date) }
+        { cutoffDate: expect.any(Date) },
       );
       expect(mockQueryBuilder.execute).toHaveBeenCalled();
     });

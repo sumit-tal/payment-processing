@@ -71,7 +71,7 @@ export class WebhookService {
         eventType,
         externalId: parsedPayload.notificationId,
         payload: parsedPayload.payload,
-        signature: headers[this.webhookValidationService.extractWebhookHeaders(headers).signature] || undefined,
+        signature: this.webhookValidationService.extractWebhookHeaders(headers).signature || undefined,
       });
 
       // Queue the event for async processing

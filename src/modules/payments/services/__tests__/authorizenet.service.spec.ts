@@ -1,9 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { InternalServerErrorException, BadRequestException } from '@nestjs/common';
-import { AuthorizeNetService } from './authorizenet.service';
-import { CreatePaymentDto, CapturePaymentDto, RefundPaymentDto, CancelPaymentDto } from '../dto';
-import { PaymentMethodType } from '../entities';
+import {
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
+import { AuthorizeNetService } from '../authorizenet.service';
+import {
+  CreatePaymentDto,
+  CapturePaymentDto,
+  RefundPaymentDto,
+  CancelPaymentDto,
+} from '../../dto';
+import { PaymentMethodType } from '@/database/entities';
 
 // Mock the authorizenet module
 jest.mock('authorizenet', () => ({
@@ -50,7 +58,11 @@ jest.mock('authorizenet', () => ({
     CreateTransactionResponse: jest.fn().mockImplementation(() => ({
       getMessages: jest.fn().mockReturnValue({
         getResultCode: jest.fn(),
-        getMessage: jest.fn().mockReturnValue([{ getText: jest.fn().mockReturnValue('Error message') }]),
+        getMessage: jest
+          .fn()
+          .mockReturnValue([
+            { getText: jest.fn().mockReturnValue('Error message') },
+          ]),
       }),
       getTransactionResponse: jest.fn(),
     })),
@@ -85,7 +97,7 @@ describe('AuthorizeNetService', () => {
   let configService: jest.Mocked<ConfigService>;
 
   const mockCreatePaymentDto: CreatePaymentDto = {
-    amount: 100.00,
+    amount: 100.0,
     currency: 'USD',
     paymentMethod: PaymentMethodType.CREDIT_CARD,
     creditCard: {
@@ -138,13 +150,17 @@ describe('AuthorizeNetService', () => {
   describe('When service is initialized', () => {
     it('Then should validate configuration successfully', () => {
       expect(service).toBeDefined();
-      expect(configService.get).toHaveBeenCalledWith('AUTHORIZENET_API_LOGIN_ID');
-      expect(configService.get).toHaveBeenCalledWith('AUTHORIZENET_TRANSACTION_KEY');
+      expect(configService.get).toHaveBeenCalledWith(
+        'AUTHORIZENET_API_LOGIN_ID',
+      );
+      expect(configService.get).toHaveBeenCalledWith(
+        'AUTHORIZENET_TRANSACTION_KEY',
+      );
     });
 
     it('Then should throw error for missing configuration', () => {
       configService.get.mockReturnValue(null);
-      
+
       expect(() => {
         new AuthorizeNetService(configService);
       }).toThrow('Authorize.Net API credentials are required');
@@ -156,7 +172,7 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({
           messages: {
             resultCode: 'Ok',
@@ -176,8 +192,10 @@ describe('AuthorizeNetService', () => {
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Ok'),
@@ -187,19 +205,26 @@ describe('AuthorizeNetService', () => {
           getAuthCode: jest.fn().mockReturnValue('AUTH123'),
           getResponseCode: jest.fn().mockReturnValue('1'),
           getMessages: jest.fn().mockReturnValue({
-            getMessage: jest.fn().mockReturnValue([{
-              getDescription: jest.fn().mockReturnValue('This transaction has been approved.'),
-            }]),
+            getMessage: jest.fn().mockReturnValue([
+              {
+                getDescription: jest
+                  .fn()
+                  .mockReturnValue('This transaction has been approved.'),
+              },
+            ]),
           }),
           getAvsResultCode: jest.fn().mockReturnValue('Y'),
           getCvvResultCode: jest.fn().mockReturnValue('M'),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
-      const result = await service.createPurchaseTransaction(mockCreatePaymentDto);
+      const result =
+        await service.createPurchaseTransaction(mockCreatePaymentDto);
 
       // Assert
       expect(result.success).toBe(true);
@@ -211,26 +236,33 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({}),
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Error'),
-          getMessage: jest.fn().mockReturnValue([{
-            getText: jest.fn().mockReturnValue('Transaction failed'),
-          }]),
+          getMessage: jest.fn().mockReturnValue([
+            {
+              getText: jest.fn().mockReturnValue('Transaction failed'),
+            },
+          ]),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
-      const result = await service.createPurchaseTransaction(mockCreatePaymentDto);
+      const result =
+        await service.createPurchaseTransaction(mockCreatePaymentDto);
 
       // Assert
       expect(result.success).toBe(false);
@@ -243,13 +275,15 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({}),
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Ok'),
@@ -259,19 +293,26 @@ describe('AuthorizeNetService', () => {
           getAuthCode: jest.fn().mockReturnValue('AUTH456'),
           getResponseCode: jest.fn().mockReturnValue('1'),
           getMessages: jest.fn().mockReturnValue({
-            getMessage: jest.fn().mockReturnValue([{
-              getDescription: jest.fn().mockReturnValue('This transaction has been approved.'),
-            }]),
+            getMessage: jest.fn().mockReturnValue([
+              {
+                getDescription: jest
+                  .fn()
+                  .mockReturnValue('This transaction has been approved.'),
+              },
+            ]),
           }),
           getAvsResultCode: jest.fn().mockReturnValue('Y'),
           getCvvResultCode: jest.fn().mockReturnValue('M'),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
-      const result = await service.createAuthorizationTransaction(mockCreatePaymentDto);
+      const result =
+        await service.createAuthorizationTransaction(mockCreatePaymentDto);
 
       // Assert
       expect(result.success).toBe(true);
@@ -282,7 +323,7 @@ describe('AuthorizeNetService', () => {
   describe('When capturing transaction', () => {
     const mockCaptureDto: CapturePaymentDto = {
       transactionId: 'auth-123',
-      amount: 50.00,
+      amount: 50.0,
       idempotencyKey: 'capture-key',
     };
 
@@ -290,13 +331,15 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({}),
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Ok'),
@@ -304,17 +347,23 @@ describe('AuthorizeNetService', () => {
         getTransactionResponse: jest.fn().mockReturnValue({
           getTransId: jest.fn().mockReturnValue('capture-123'),
           getMessages: jest.fn().mockReturnValue({
-            getMessage: jest.fn().mockReturnValue([{
-              getDescription: jest.fn().mockReturnValue('This transaction has been approved.'),
-            }]),
+            getMessage: jest.fn().mockReturnValue([
+              {
+                getDescription: jest
+                  .fn()
+                  .mockReturnValue('This transaction has been approved.'),
+              },
+            ]),
           }),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
-      const result = await service.captureTransaction(mockCaptureDto, 100.00);
+      const result = await service.captureTransaction(mockCaptureDto, 100.0);
 
       // Assert
       expect(result.success).toBe(true);
@@ -323,18 +372,19 @@ describe('AuthorizeNetService', () => {
 
     it('Then should reject capture amount exceeding authorized amount', async () => {
       // Arrange
-      const excessiveCaptureDto = { ...mockCaptureDto, amount: 150.00 };
+      const excessiveCaptureDto = { ...mockCaptureDto, amount: 150.0 };
 
       // Act & Assert
-      await expect(service.captureTransaction(excessiveCaptureDto, 100.00))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.captureTransaction(excessiveCaptureDto, 100.0),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('When refunding transaction', () => {
     const mockRefundDto: RefundPaymentDto = {
       transactionId: 'purchase-123',
-      amount: 25.00,
+      amount: 25.0,
       reason: 'Customer request',
       idempotencyKey: 'refund-key',
     };
@@ -343,13 +393,15 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({}),
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Ok'),
@@ -357,17 +409,27 @@ describe('AuthorizeNetService', () => {
         getTransactionResponse: jest.fn().mockReturnValue({
           getTransId: jest.fn().mockReturnValue('refund-123'),
           getMessages: jest.fn().mockReturnValue({
-            getMessage: jest.fn().mockReturnValue([{
-              getDescription: jest.fn().mockReturnValue('This transaction has been approved.'),
-            }]),
+            getMessage: jest.fn().mockReturnValue([
+              {
+                getDescription: jest
+                  .fn()
+                  .mockReturnValue('This transaction has been approved.'),
+              },
+            ]),
           }),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
-      const result = await service.refundTransaction(mockRefundDto, 100.00, '1111');
+      const result = await service.refundTransaction(
+        mockRefundDto,
+        100.0,
+        '1111',
+      );
 
       // Assert
       expect(result.success).toBe(true);
@@ -376,11 +438,12 @@ describe('AuthorizeNetService', () => {
 
     it('Then should reject refund amount exceeding original amount', async () => {
       // Arrange
-      const excessiveRefundDto = { ...mockRefundDto, amount: 150.00 };
+      const excessiveRefundDto = { ...mockRefundDto, amount: 150.0 };
 
       // Act & Assert
-      await expect(service.refundTransaction(excessiveRefundDto, 100.00, '1111'))
-        .rejects.toThrow(BadRequestException);
+      await expect(
+        service.refundTransaction(excessiveRefundDto, 100.0, '1111'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -395,13 +458,15 @@ describe('AuthorizeNetService', () => {
       // Arrange
       const mockController = {
         setEnvironment: jest.fn(),
-        execute: jest.fn((callback) => callback()),
+        execute: jest.fn(callback => callback()),
         getResponse: jest.fn().mockReturnValue({}),
       };
 
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(mockController);
-      
+      AuthorizeNet.APIControllers.CreateTransactionController.mockReturnValue(
+        mockController,
+      );
+
       const mockResponse = {
         getMessages: jest.fn().mockReturnValue({
           getResultCode: jest.fn().mockReturnValue('Ok'),
@@ -409,14 +474,20 @@ describe('AuthorizeNetService', () => {
         getTransactionResponse: jest.fn().mockReturnValue({
           getTransId: jest.fn().mockReturnValue('void-123'),
           getMessages: jest.fn().mockReturnValue({
-            getMessage: jest.fn().mockReturnValue([{
-              getDescription: jest.fn().mockReturnValue('This transaction has been approved.'),
-            }]),
+            getMessage: jest.fn().mockReturnValue([
+              {
+                getDescription: jest
+                  .fn()
+                  .mockReturnValue('This transaction has been approved.'),
+              },
+            ]),
           }),
         }),
       };
 
-      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(mockResponse);
+      AuthorizeNet.APIContracts.CreateTransactionResponse.mockReturnValue(
+        mockResponse,
+      );
 
       // Act
       const result = await service.voidTransaction(mockCancelDto);
@@ -431,13 +502,16 @@ describe('AuthorizeNetService', () => {
     it('Then should handle service errors gracefully', async () => {
       // Arrange
       const AuthorizeNet = require('authorizenet');
-      AuthorizeNet.APIControllers.CreateTransactionController.mockImplementation(() => {
-        throw new Error('Network error');
-      });
+      AuthorizeNet.APIControllers.CreateTransactionController.mockImplementation(
+        () => {
+          throw new Error('Network error');
+        },
+      );
 
       // Act & Assert
-      await expect(service.createPurchaseTransaction(mockCreatePaymentDto))
-        .rejects.toThrow(InternalServerErrorException);
+      await expect(
+        service.createPurchaseTransaction(mockCreatePaymentDto),
+      ).rejects.toThrow(InternalServerErrorException);
     });
   });
 });

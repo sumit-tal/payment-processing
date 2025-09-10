@@ -91,37 +91,35 @@ export class AuthorizeNetService {
       ctrl.execute(() => {
         const apiResponse = ctrl.getResponse();
         const response = new this.apiContracts.CreateTransactionResponse(apiResponse);
-        
         this.logger.debug('Authorize.Net Response', { response: apiResponse });
 
-        if (response.getMessages().getResultCode() === this.apiContracts.MessageTypeEnum.OK) {
-          const transactionResponse = response.getTransactionResponse();
-          
-          if (transactionResponse.getMessages() !== null) {
+        const resultCode = response?.getMessages?.()?.getResultCode?.();
+        if (resultCode === this.apiContracts.MessageTypeEnum.OK) {
+          const tr = response?.getTransactionResponse?.();
+          const hasSuccessMessage = !!tr?.getMessages?.();
+
+          if (hasSuccessMessage) {
             resolve({
               success: true,
-              transactionId: transactionResponse.getTransId(),
-              authCode: transactionResponse.getAuthCode(),
-              responseCode: transactionResponse.getResponseCode(),
-              responseText: transactionResponse.getMessages().getMessage()[0].getDescription(),
-              avsResult: transactionResponse.getAvsResultCode(),
-              cvvResult: transactionResponse.getCvvResultCode(),
+              transactionId: tr?.getTransId?.(),
+              authCode: tr?.getAuthCode?.(),
+              responseCode: tr?.getResponseCode?.(),
+              responseText: tr?.getMessages?.()?.getMessage?.()?.[0]?.getDescription?.(),
+              avsResult: tr?.getAvsResultCode?.(),
+              cvvResult: tr?.getCvvResultCode?.(),
               rawResponse: apiResponse,
             });
           } else {
-            const errorMessage = transactionResponse.getErrors() 
-              ? transactionResponse.getErrors().getError()[0].getErrorText()
-              : 'Transaction failed';
-            
+            const errorMessage = tr?.getErrors?.()?.getError?.()?.[0]?.getErrorText?.() || 'Transaction failed';
             resolve({
               success: false,
               errorMessage,
-              responseCode: transactionResponse.getResponseCode(),
+              responseCode: tr?.getResponseCode?.(),
               rawResponse: apiResponse,
             });
           }
         } else {
-          const errorMessage = response.getMessages().getMessage()[0].getText();
+          const errorMessage = response?.getMessages?.()?.getMessage?.()?.[0]?.getText?.() || 'Transaction failed';
           resolve({
             success: false,
             errorMessage,
@@ -214,6 +212,9 @@ export class AuthorizeNetService {
 
       return await this.executeTransaction(createRequest);
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       this.logger.error('Capture transaction failed', error);
       throw new InternalServerErrorException('Payment capture failed');
     }
@@ -247,6 +248,9 @@ export class AuthorizeNetService {
 
       return await this.executeTransaction(createRequest);
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
       this.logger.error('Refund transaction failed', error);
       throw new InternalServerErrorException('Payment refund failed');
     }

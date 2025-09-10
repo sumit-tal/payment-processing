@@ -2,15 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { NotFoundException, ConflictException } from '@nestjs/common';
-import { SubscriptionPlanService } from './subscription-plan.service';
-import { SubscriptionPlan, SubscriptionPlanStatus, BillingInterval } from '../entities/subscription-plan.entity';
-import { CreateSubscriptionPlanDto, UpdateSubscriptionPlanDto } from '../dto/subscription-plan.dto';
+import { SubscriptionPlanService } from '../subscription-plan.service';
+import {
+  SubscriptionPlan,
+  SubscriptionPlanStatus,
+  BillingInterval,
+} from '../../../../database/entities/subscription-plan.entity';
+import {
+  CreateSubscriptionPlanDto,
+  UpdateSubscriptionPlanDto,
+} from '../../dto/subscription-plan.dto';
 
 describe('SubscriptionPlanService', () => {
   let service: SubscriptionPlanService;
   let repository: jest.Mocked<Repository<SubscriptionPlan>>;
 
-  const mockSubscriptionPlan: SubscriptionPlan = {
+  const mockSubscriptionPlan = new SubscriptionPlan({
     id: '123e4567-e89b-12d3-a456-426614174000',
     name: 'Basic Plan',
     description: 'Basic subscription plan',
@@ -26,7 +33,7 @@ describe('SubscriptionPlanService', () => {
     metadata: {},
     createdAt: new Date(),
     updatedAt: new Date(),
-  } as SubscriptionPlan;
+  });
 
   beforeEach(async () => {
     const mockRepository = {
@@ -81,7 +88,9 @@ describe('SubscriptionPlanService', () => {
     it('should throw ConflictException when plan name already exists', async () => {
       repository.findOne.mockResolvedValue(mockSubscriptionPlan);
 
-      await expect(service.createPlan(createPlanDto)).rejects.toThrow(ConflictException);
+      await expect(service.createPlan(createPlanDto)).rejects.toThrow(
+        ConflictException,
+      );
       expect(repository.save).not.toHaveBeenCalled();
     });
   });
@@ -101,7 +110,9 @@ describe('SubscriptionPlanService', () => {
     it('should throw NotFoundException when plan not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.findPlanById('non-existent-id')).rejects.toThrow(NotFoundException);
+      await expect(service.findPlanById('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -112,12 +123,15 @@ describe('SubscriptionPlanService', () => {
         orderBy: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValue([mockSubscriptionPlan]),
       };
-      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
       const result = await service.findAllPlans();
 
       expect(repository.createQueryBuilder).toHaveBeenCalledWith('plan');
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('plan.createdAt', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'plan.createdAt',
+        'DESC',
+      );
       expect(result).toEqual([mockSubscriptionPlan]);
     });
 
@@ -127,26 +141,52 @@ describe('SubscriptionPlanService', () => {
         orderBy: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValue([mockSubscriptionPlan]),
       };
-      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
       await service.findAllPlans({ isActive: true });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('plan.isActive = :isActive', { isActive: true });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'plan.isActive = :isActive',
+        { isActive: true },
+      );
+    });
+
+    it('should filter by status when provided', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockSubscriptionPlan]),
+      };
+      repository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAllPlans({ status: SubscriptionPlanStatus.ACTIVE });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'plan.status = :status',
+        { status: SubscriptionPlanStatus.ACTIVE },
+      );
     });
   });
 
   describe('updatePlan', () => {
     const updatePlanDto: UpdateSubscriptionPlanDto = {
       description: 'Updated description',
-      setupFee: 5.00,
+      setupFee: 5.0,
     };
 
     it('should update subscription plan when found', async () => {
-      const updatedPlan = { ...mockSubscriptionPlan, ...updatePlanDto };
+      const updatedPlan = new SubscriptionPlan({
+        ...mockSubscriptionPlan,
+        description: updatePlanDto.description,
+        setupFee: updatePlanDto.setupFee,
+      });
       repository.findOne.mockResolvedValue(mockSubscriptionPlan);
       repository.save.mockResolvedValue(updatedPlan);
 
-      const result = await service.updatePlan(mockSubscriptionPlan.id, updatePlanDto);
+      const result = await service.updatePlan(
+        mockSubscriptionPlan.id,
+        updatePlanDto,
+      );
 
       expect(repository.findOne).toHaveBeenCalledWith({
         where: { id: mockSubscriptionPlan.id },
@@ -158,30 +198,50 @@ describe('SubscriptionPlanService', () => {
     it('should throw NotFoundException when plan not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(service.updatePlan('non-existent-id', updatePlanDto)).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updatePlan('non-existent-id', updatePlanDto),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
   describe('deactivatePlan', () => {
     it('should deactivate subscription plan when found', async () => {
-      const deactivatedPlan = {
+      const deactivatedPlan = new SubscriptionPlan({
         ...mockSubscriptionPlan,
         isActive: false,
         status: SubscriptionPlanStatus.INACTIVE,
-      };
+      });
       repository.findOne.mockResolvedValue(mockSubscriptionPlan);
       repository.save.mockResolvedValue(deactivatedPlan);
 
       const result = await service.deactivatePlan(mockSubscriptionPlan.id);
 
+      expect(repository.findOne).toHaveBeenCalledWith({
+        where: { id: mockSubscriptionPlan.id },
+      });
+      expect(repository.save).toHaveBeenCalled();
       expect(result.isActive).toBe(false);
       expect(result.status).toBe(SubscriptionPlanStatus.INACTIVE);
+    });
+
+    it('should throw NotFoundException when plan not found', async () => {
+      repository.findOne.mockResolvedValue(null);
+
+      await expect(service.deactivatePlan('non-existent-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('isPlanAvailable', () => {
     it('should return true when plan is active and available', async () => {
-      repository.findOne.mockResolvedValue(mockSubscriptionPlan);
+      // Make sure the mock plan has both isActive=true and status=ACTIVE
+      const activePlan = {
+        ...mockSubscriptionPlan,
+        isActive: true,
+        status: SubscriptionPlanStatus.ACTIVE
+      };
+      repository.findOne.mockResolvedValue(activePlan);
 
       const result = await service.isPlanAvailable(mockSubscriptionPlan.id);
 

@@ -60,11 +60,19 @@ export class CryptoService {
     signature: string,
     secret: string,
   ): boolean {
-    const expectedSignature = this.generateHmacSignature(data, secret);
-    return crypto.timingSafeEqual(
-      Buffer.from(signature, 'hex'),
-      Buffer.from(expectedSignature, 'hex'),
-    );
+    try {
+      const expectedSignature = this.generateHmacSignature(data, secret);
+      // Check if signature is valid hex and has the correct length
+      if (!signature.match(/^[0-9a-fA-F]+$/) || signature.length !== expectedSignature.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(
+        Buffer.from(signature, 'hex'),
+        Buffer.from(expectedSignature, 'hex'),
+      );
+    } catch (error) {
+      return false;
+    }
   }
 
   /**
@@ -162,10 +170,18 @@ export class CryptoService {
    * Verify data integrity using checksum
    */
   verifyChecksum(data: string, expectedChecksum: string): boolean {
-    const actualChecksum = this.generateChecksum(data);
-    return crypto.timingSafeEqual(
-      Buffer.from(actualChecksum, 'hex'),
-      Buffer.from(expectedChecksum, 'hex'),
-    );
+    try {
+      const actualChecksum = this.generateChecksum(data);
+      // Check if expectedChecksum is valid hex and has the correct length
+      if (!expectedChecksum.match(/^[0-9a-fA-F]+$/) || expectedChecksum.length !== actualChecksum.length) {
+        return false;
+      }
+      return crypto.timingSafeEqual(
+        Buffer.from(actualChecksum, 'hex'),
+        Buffer.from(expectedChecksum, 'hex'),
+      );
+    } catch (error) {
+      return false;
+    }
   }
 }

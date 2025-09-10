@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { CryptoService } from './crypto.service';
+import { CryptoService } from '../crypto.service';
 
 describe('CryptoService', () => {
   let service: CryptoService;
@@ -25,13 +25,15 @@ describe('CryptoService', () => {
     configService = module.get<ConfigService>(ConfigService);
 
     // Setup default config values
-    mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-      const config = {
-        'BCRYPT_ROUNDS': 12,
-        'ENCRYPTION_KEY': 'test-encryption-key-for-testing',
-      };
-      return config[key] || defaultValue;
-    });
+    mockConfigService.get.mockImplementation(
+      (key: string, defaultValue?: any) => {
+        const config = {
+          BCRYPT_ROUNDS: 12,
+          ENCRYPTION_KEY: 'test-encryption-key-for-testing',
+        };
+        return config[key] || defaultValue;
+      },
+    );
   });
 
   afterEach(() => {

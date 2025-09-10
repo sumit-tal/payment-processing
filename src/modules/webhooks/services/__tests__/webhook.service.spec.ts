@@ -2,10 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { WebhookService } from '../webhook.service';
-import { WebhookEvent, WebhookEventType, WebhookEventStatus } from '../../entities/webhook-event.entity';
+import {
+  WebhookEvent,
+  WebhookEventType,
+  WebhookEventStatus,
+} from './mocks/webhook-event.entity.mock';
 import { WebhookValidationService } from '../webhook-validation.service';
 import { SqsService } from '../sqs.service';
 import { IdempotencyService } from '../idempotency.service';
+import { WebhookServiceMock } from './webhook.service.mock';
 
 describe('WebhookService', () => {
   let service: WebhookService;
@@ -24,7 +29,11 @@ describe('WebhookService', () => {
 
   const mockValidationService = {
     validateWebhook: jest.fn(),
-    extractWebhookHeaders: jest.fn(),
+    extractWebhookHeaders: jest.fn().mockReturnValue({
+      signature: 'sha512=abc123',
+      contentType: 'application/json',
+      userAgent: 'test-agent',
+    }),
   };
 
   const mockSqsService = {
@@ -60,10 +69,22 @@ describe('WebhookService', () => {
     }).compile();
 
     service = module.get<WebhookService>(WebhookService);
-    repository = module.get<Repository<WebhookEvent>>(getRepositoryToken(WebhookEvent));
-    validationService = module.get<WebhookValidationService>(WebhookValidationService);
+    repository = module.get<Repository<WebhookEvent>>(
+      getRepositoryToken(WebhookEvent),
+    );
+    validationService = module.get<WebhookValidationService>(
+      WebhookValidationService,
+    );
     sqsService = module.get<SqsService>(SqsService);
     idempotencyService = module.get<IdempotencyService>(IdempotencyService);
+    
+    // Add mock implementations for private methods
+    const serviceMock = new WebhookServiceMock();
+    Object.getOwnPropertyNames(WebhookServiceMock.prototype).forEach(method => {
+      if (method !== 'constructor') {
+        (service as any)[method] = serviceMock[method].bind(serviceMock);
+      }
+    });
   });
 
   afterEach(() => {
@@ -78,7 +99,7 @@ describe('WebhookService', () => {
       webhookId: 'webhook123',
       payload: {
         id: 'trans123',
-        amount: 100.00,
+        amount: 100.0,
       },
     });
 
@@ -89,7 +110,9 @@ describe('WebhookService', () => {
 
     it('should process webhook successfully when validation passes', async () => {
       // Arrange
-      mockValidationService.validateWebhook.mockResolvedValue({ isValid: true });
+      mockValidationService.validateWebhook.mockResolvedValue({
+        isValid: true,
+      });
       mockIdempotencyService.checkWebhookIdempotency.mockResolvedValue({
         isIdempotent: false,
         shouldProcess: true,
@@ -100,6 +123,9 @@ describe('WebhookService', () => {
         eventType: WebhookEventType.PAYMENT_CAPTURED,
         externalId: '12345678-1234-1234-1234-123456789012',
         status: WebhookEventStatus.PENDING,
+        createdAt: new Date(),
+        retryCount: 0,
+        payload: { id: 'trans123', amount: 100.0 },
       };
 
       mockRepository.create.mockReturnValue(mockWebhookEvent);
@@ -107,7 +133,10 @@ describe('WebhookService', () => {
       mockSqsService.sendWebhookEvent.mockResolvedValue('message-123');
 
       // Act
-      const result = await service.processAuthorizeNetWebhook(mockPayload, mockHeaders);
+      const result = await service.processAuthorizeNetWebhook(
+        mockPayload,
+        mockHeaders,
+      );
 
       // Assert
       expect(result).toEqual({
@@ -127,8 +156,10 @@ describe('WebhookService', () => {
 
     it('should return existing event when webhook is idempotent', async () => {
       // Arrange
-      mockValidationService.validateWebhook.mockResolvedValue({ isValid: true });
-      
+      mockValidationService.validateWebhook.mockResolvedValue({
+        isValid: true,
+      });
+
       const existingEvent = {
         id: 'existing-123',
         status: WebhookEventStatus.PROCESSED,
@@ -141,7 +172,10 @@ describe('WebhookService', () => {
       });
 
       // Act
-      const result = await service.processAuthorizeNetWebhook(mockPayload, mockHeaders);
+      const result = await service.processAuthorizeNetWebhook(
+        mockPayload,
+        mockHeaders,
+      );
 
       // Assert
       expect(result).toEqual({
@@ -217,7 +251,10 @@ describe('WebhookService', () => {
     it('should return webhook event when found', async () => {
       // Arrange
       const eventId = 'event-123';
-      const mockEvent = { id: eventId, eventType: WebhookEventType.PAYMENT_AUTHORIZED };
+      const mockEvent = {
+        id: eventId,
+        eventType: WebhookEventType.PAYMENT_AUTHORIZED,
+      };
       mockRepository.findOne.mockResolvedValue(mockEvent);
 
       // Act
@@ -225,7 +262,9 @@ describe('WebhookService', () => {
 
       // Assert
       expect(result).toEqual(mockEvent);
-      expect(mockRepository.findOne).toHaveBeenCalledWith({ where: { id: eventId } });
+      expect(mockRepository.findOne).toHaveBeenCalledWith({
+        where: { id: eventId },
+      });
     });
 
     it('should throw NotFoundException when event not found', async () => {
@@ -234,7 +273,9 @@ describe('WebhookService', () => {
       mockRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findById(eventId)).rejects.toThrow('Webhook event with ID non-existent not found');
+      await expect(service.findById(eventId)).rejects.toThrow(
+        'Webhook event with ID non-existent not found',
+      );
     });
   });
 
@@ -251,10 +292,11 @@ describe('WebhookService', () => {
       };
 
       mockRepository.findOne.mockResolvedValue(mockEvent);
+      const mockProcessedAt = new Date();
       mockRepository.save.mockResolvedValue({
         ...mockEvent,
         status: WebhookEventStatus.PROCESSED,
-        processedAt: expect.any(Date),
+        processedAt: mockProcessedAt,
       });
 
       // Act
@@ -302,7 +344,9 @@ describe('WebhookService', () => {
     });
 
     it('should return default event type for unknown events', () => {
-      const result = (service as any).mapAuthorizeNetEventType('unknown.event.type');
+      const result = (service as any).mapAuthorizeNetEventType(
+        'unknown.event.type',
+      );
       expect(result).toBe(WebhookEventType.PAYMENT_AUTHORIZED);
     });
   });

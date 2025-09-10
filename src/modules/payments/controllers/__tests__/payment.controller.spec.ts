@@ -1,9 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ValidationPipe } from '@nestjs/common';
-import { PaymentController } from './payment.controller';
-import { PaymentService, PaymentResponse } from '../services';
-import { CreatePaymentDto, CapturePaymentDto, RefundPaymentDto, CancelPaymentDto } from '../dto';
-import { Transaction, TransactionType, TransactionStatus, PaymentMethodType } from '../entities';
+import { PaymentController } from '../payment.controller';
+import { PaymentService, PaymentResponse } from '../../services';
+import {
+  CreatePaymentDto,
+  CapturePaymentDto,
+  RefundPaymentDto,
+  CancelPaymentDto,
+} from '../../dto';
+import {
+  Transaction,
+  TransactionType,
+  TransactionStatus,
+  PaymentMethodType,
+} from '@/database/entities';
 
 describe('PaymentController', () => {
   let controller: PaymentController;
@@ -12,7 +22,7 @@ describe('PaymentController', () => {
   const mockPaymentResponse: PaymentResponse = {
     transactionId: 'test-transaction-id',
     status: TransactionStatus.COMPLETED,
-    amount: 100.00,
+    amount: 100.0,
     currency: 'USD',
     gatewayTransactionId: 'gateway-123',
     authCode: 'AUTH123',
@@ -27,7 +37,7 @@ describe('PaymentController', () => {
     type: TransactionType.PURCHASE,
     status: TransactionStatus.COMPLETED,
     paymentMethod: PaymentMethodType.CREDIT_CARD,
-    amount: 100.00,
+    amount: 100.0,
     refundedAmount: 0,
     currency: 'USD',
     idempotencyKey: 'test-key',
@@ -36,7 +46,7 @@ describe('PaymentController', () => {
   } as Transaction;
 
   const mockCreatePaymentDto: CreatePaymentDto = {
-    amount: 100.00,
+    amount: 100.0,
     currency: 'USD',
     paymentMethod: PaymentMethodType.CREDIT_CARD,
     creditCard: {
@@ -88,14 +98,19 @@ describe('PaymentController', () => {
 
       // Assert
       expect(result).toBe(mockPaymentResponse);
-      expect(paymentService.createPurchase).toHaveBeenCalledWith(mockCreatePaymentDto);
+      expect(paymentService.createPurchase).toHaveBeenCalledWith(
+        mockCreatePaymentDto,
+      );
     });
   });
 
   describe('When creating an authorization', () => {
     it('Then should return payment response', async () => {
       // Arrange
-      const authResponse = { ...mockPaymentResponse, status: TransactionStatus.COMPLETED };
+      const authResponse = {
+        ...mockPaymentResponse,
+        status: TransactionStatus.COMPLETED,
+      };
       paymentService.createAuthorization.mockResolvedValue(authResponse);
 
       // Act
@@ -103,7 +118,9 @@ describe('PaymentController', () => {
 
       // Assert
       expect(result).toBe(authResponse);
-      expect(paymentService.createAuthorization).toHaveBeenCalledWith(mockCreatePaymentDto);
+      expect(paymentService.createAuthorization).toHaveBeenCalledWith(
+        mockCreatePaymentDto,
+      );
     });
   });
 
@@ -112,10 +129,10 @@ describe('PaymentController', () => {
       // Arrange
       const captureDto: CapturePaymentDto = {
         transactionId: 'test-transaction-id',
-        amount: 50.00,
+        amount: 50.0,
         idempotencyKey: 'capture-key',
       };
-      const captureResponse = { ...mockPaymentResponse, amount: 50.00 };
+      const captureResponse = { ...mockPaymentResponse, amount: 50.0 };
       paymentService.capturePayment.mockResolvedValue(captureResponse);
 
       // Act
@@ -132,11 +149,11 @@ describe('PaymentController', () => {
       // Arrange
       const refundDto: RefundPaymentDto = {
         transactionId: 'test-transaction-id',
-        amount: 25.00,
+        amount: 25.0,
         reason: 'Customer request',
         idempotencyKey: 'refund-key',
       };
-      const refundResponse = { ...mockPaymentResponse, amount: 25.00 };
+      const refundResponse = { ...mockPaymentResponse, amount: 25.0 };
       paymentService.refundPayment.mockResolvedValue(refundResponse);
 
       // Act
@@ -177,7 +194,9 @@ describe('PaymentController', () => {
 
       // Assert
       expect(result).toBe(mockTransaction);
-      expect(paymentService.getTransaction).toHaveBeenCalledWith('test-transaction-id');
+      expect(paymentService.getTransaction).toHaveBeenCalledWith(
+        'test-transaction-id',
+      );
     });
   });
 });

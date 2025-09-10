@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { TracingService, TraceContext } from './tracing.service';
+import { TracingService, TraceContext } from '../tracing.service';
 import { Request } from 'express';
 
 describe('TracingService', () => {
@@ -17,7 +17,7 @@ describe('TracingService', () => {
     it('Then should return correlation ID from request', () => {
       const mockRequest = {
         correlationId: 'test-correlation-id',
-      } as Request;
+      } as unknown as Request;
 
       const correlationId = service.getCorrelationId(mockRequest);
 
@@ -25,7 +25,7 @@ describe('TracingService', () => {
     });
 
     it('Then should return unknown when correlation ID is missing', () => {
-      const mockRequest = {} as Request;
+      const mockRequest = {} as unknown as Request;
 
       const correlationId = service.getCorrelationId(mockRequest);
 
@@ -50,8 +50,15 @@ describe('TracingService', () => {
     });
 
     it('Then should create child span with parent context', () => {
-      const parentSpan = service.startSpan('parent-operation', 'correlation-123');
-      const childSpan = service.startSpan('child-operation', 'correlation-123', parentSpan.spanId);
+      const parentSpan = service.startSpan(
+        'parent-operation',
+        'correlation-123',
+      );
+      const childSpan = service.startSpan(
+        'child-operation',
+        'correlation-123',
+        parentSpan.spanId,
+      );
 
       expect(childSpan.parentSpanId).toBe(parentSpan.spanId);
       expect(childSpan.traceId).toBe(parentSpan.traceId);
@@ -60,9 +67,9 @@ describe('TracingService', () => {
   });
 
   describe('When finishing a span', () => {
-    it('Then should complete span with duration', () => {
+    it('Then should complete span with duration', done => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
+
       // Wait a small amount to ensure duration > 0
       setTimeout(() => {
         const finishedSpan = service.finishSpan(span.spanId);
@@ -70,6 +77,7 @@ describe('TracingService', () => {
         expect(finishedSpan).toBeDefined();
         expect(finishedSpan!.endTime).toBeDefined();
         expect(finishedSpan!.duration).toBeGreaterThan(0);
+        done();
       }, 1);
     });
 
@@ -83,7 +91,7 @@ describe('TracingService', () => {
   describe('When managing span tags', () => {
     it('Then should set tags on existing span', () => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
+
       service.setSpanTags(span.spanId, {
         'http.method': 'POST',
         'http.status_code': 200,
@@ -98,7 +106,7 @@ describe('TracingService', () => {
 
     it('Then should merge tags with existing tags', () => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
+
       service.setSpanTags(span.spanId, { tag1: 'value1' });
       service.setSpanTags(span.spanId, { tag2: 'value2' });
 
@@ -119,8 +127,10 @@ describe('TracingService', () => {
   describe('When logging to span', () => {
     it('Then should add log entry to span', () => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
-      service.logToSpan(span.spanId, 'info', 'Test log message', { key: 'value' });
+
+      service.logToSpan(span.spanId, 'info', 'Test log message', {
+        key: 'value',
+      });
 
       const retrievedSpan = service.getSpan(span.spanId);
       expect(retrievedSpan!.logs).toHaveLength(1);
@@ -134,7 +144,7 @@ describe('TracingService', () => {
 
     it('Then should add multiple log entries', () => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
+
       service.logToSpan(span.spanId, 'info', 'First log');
       service.logToSpan(span.spanId, 'error', 'Second log');
 
@@ -152,7 +162,7 @@ describe('TracingService', () => {
   describe('When retrieving spans', () => {
     it('Then should return span by ID', () => {
       const span = service.startSpan('test-operation', 'correlation-123');
-      
+
       const retrievedSpan = service.getSpan(span.spanId);
 
       expect(retrievedSpan).toEqual(span);

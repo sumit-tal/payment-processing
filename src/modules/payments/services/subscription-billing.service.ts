@@ -113,7 +113,7 @@ export class SubscriptionBillingService {
       this.logger.log(`Processing billing for subscription: ${subscription.id}`);
 
       // Create subscription payment record
-      const subscriptionPayment = new SubscriptionPayment({
+      const subscriptionPayment = this.subscriptionPaymentRepository.create({
         subscriptionId: subscription.id,
         amount: subscription.subscriptionPlan.amount,
         currency: subscription.subscriptionPlan.currency,

@@ -7,7 +7,13 @@ describe('WebhookValidationService', () => {
   let configService: ConfigService;
 
   const mockConfigService = {
-    get: jest.fn(),
+    get: jest.fn().mockImplementation((key: string, defaultValue?: any) => {
+      const config = {
+        WEBHOOK_SECRET_KEY: 'test-secret-key',
+        WEBHOOK_SIGNATURE_HEADER: 'X-ANET-Signature',
+      };
+      return config[key] || defaultValue;
+    }),
   };
 
   beforeEach(async () => {
@@ -23,15 +29,6 @@ describe('WebhookValidationService', () => {
 
     service = module.get<WebhookValidationService>(WebhookValidationService);
     configService = module.get<ConfigService>(ConfigService);
-
-    // Setup default config values
-    mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-      const config = {
-        WEBHOOK_SECRET_KEY: 'test-secret-key',
-        WEBHOOK_SIGNATURE_HEADER: 'X-ANET-Signature',
-      };
-      return config[key] || defaultValue;
-    });
   });
 
   afterEach(() => {
@@ -43,9 +40,11 @@ describe('WebhookValidationService', () => {
       // Arrange
       const payload = '{"test":"data"}';
       const signature = 'sha512=valid-signature';
-      
+
       // Mock the signature generation to return expected value
-      jest.spyOn(service as any, 'generateHmacSignature').mockReturnValue('valid-signature');
+      jest
+        .spyOn(service as any, 'generateHmacSignature')
+        .mockReturnValue('valid-signature');
 
       // Act
       const result = service.validateAuthorizeNetSignature(payload, signature);
@@ -59,8 +58,10 @@ describe('WebhookValidationService', () => {
       // Arrange
       const payload = '{"test":"data"}';
       const signature = 'sha512=invalid-signature';
-      
-      jest.spyOn(service as any, 'generateHmacSignature').mockReturnValue('valid-signature');
+
+      jest
+        .spyOn(service as any, 'generateHmacSignature')
+        .mockReturnValue('valid-signature');
 
       // Act
       const result = service.validateAuthorizeNetSignature(payload, signature);
@@ -191,17 +192,26 @@ describe('WebhookValidationService', () => {
   describe('validateWebhook', () => {
     it('should validate complete webhook successfully', async () => {
       // Arrange
-      const payload = '{"notificationId":"12345678-1234-1234-1234-123456789012","eventType":"net.authorize.payment.authcapture.created","eventDate":"' + new Date().toISOString() + '","webhookId":"webhook123"}';
+      const payload =
+        '{"notificationId":"12345678-1234-1234-1234-123456789012","eventType":"net.authorize.payment.authcapture.created","eventDate":"' +
+        new Date().toISOString() +
+        '","webhookId":"webhook123"}';
       const headers = {
         'x-anet-signature': 'sha512=valid-signature',
         'content-type': 'application/json',
       };
       const parsedPayload = JSON.parse(payload);
 
-      jest.spyOn(service as any, 'generateHmacSignature').mockReturnValue('valid-signature');
+      jest
+        .spyOn(service as any, 'generateHmacSignature')
+        .mockReturnValue('valid-signature');
 
       // Act
-      const result = await service.validateWebhook(payload, headers, parsedPayload);
+      const result = await service.validateWebhook(
+        payload,
+        headers,
+        parsedPayload,
+      );
 
       // Assert
       expect(result.isValid).toBe(true);
@@ -209,17 +219,26 @@ describe('WebhookValidationService', () => {
 
     it('should reject webhook with invalid signature', async () => {
       // Arrange
-      const payload = '{"notificationId":"12345678-1234-1234-1234-123456789012","eventType":"net.authorize.payment.authcapture.created","eventDate":"' + new Date().toISOString() + '","webhookId":"webhook123"}';
+      const payload =
+        '{"notificationId":"12345678-1234-1234-1234-123456789012","eventType":"net.authorize.payment.authcapture.created","eventDate":"' +
+        new Date().toISOString() +
+        '","webhookId":"webhook123"}';
       const headers = {
         'x-anet-signature': 'sha512=invalid-signature',
         'content-type': 'application/json',
       };
       const parsedPayload = JSON.parse(payload);
 
-      jest.spyOn(service as any, 'generateHmacSignature').mockReturnValue('valid-signature');
+      jest
+        .spyOn(service as any, 'generateHmacSignature')
+        .mockReturnValue('valid-signature');
 
       // Act
-      const result = await service.validateWebhook(payload, headers, parsedPayload);
+      const result = await service.validateWebhook(
+        payload,
+        headers,
+        parsedPayload,
+      );
 
       // Assert
       expect(result.isValid).toBe(false);
