@@ -1,20 +1,20 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { 
-  Transaction, 
-  PaymentMethod, 
-  SubscriptionPlan, 
-  Subscription, 
-  SubscriptionPayment 
-} from './entities';
-import { 
-  PaymentService, 
-  AuthorizeNetService, 
-  SubscriptionPlanService, 
-  SubscriptionService, 
+import {
+  Transaction,
+  PaymentMethod,
+  SubscriptionPlan,
+  Subscription,
+  SubscriptionPayment,
+} from '@/database/entities';
+import {
+  PaymentService,
+  AuthorizeNetService,
+  SubscriptionPlanService,
+  SubscriptionService,
   SubscriptionBillingService,
-  PaymentMethodService 
+  PaymentMethodService,
 } from './services';
 import { PaymentController } from './controllers';
 import { PaymentMethodController } from './controllers/payment-method.controller';
@@ -25,11 +25,11 @@ import { SubscriptionController } from './controllers/subscription.controller';
   imports: [
     ConfigModule,
     TypeOrmModule.forFeature([
-      Transaction, 
-      PaymentMethod, 
-      SubscriptionPlan, 
-      Subscription, 
-      SubscriptionPayment
+      Transaction,
+      PaymentMethod,
+      SubscriptionPlan,
+      Subscription,
+      SubscriptionPayment,
     ]),
   ],
   controllers: [
@@ -39,7 +39,7 @@ import { SubscriptionController } from './controllers/subscription.controller';
     PaymentMethodController,
   ],
   providers: [
-    PaymentService, 
+    PaymentService,
     AuthorizeNetService,
     SubscriptionPlanService,
     SubscriptionService,
@@ -47,7 +47,7 @@ import { SubscriptionController } from './controllers/subscription.controller';
     PaymentMethodService,
   ],
   exports: [
-    PaymentService, 
+    PaymentService,
     AuthorizeNetService,
     SubscriptionPlanService,
     SubscriptionService,

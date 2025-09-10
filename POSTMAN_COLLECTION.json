@@ -1,0 +1,888 @@
+{
+	"info": {
+		"_postman_id": "50a86a63-dfea-4da1-9016-fd4439bac2eb",
+		"name": "payment-processing-system",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4621698"
+	},
+	"item": [
+		{
+			"name": "health",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/health",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "{{baseURL}}/api/v1/health",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/health/database",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/health/database",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"health",
+								"database"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "api-keys",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/api-keys",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"clientId\": \"client-001\",\n    \"clientName\": \"Payments & Subscriptions Viewer\",\n    \"permissions\": [\n        \"payments:read\",\n        \"payments:write\",\n        \"subscriptions:read\"\n    ],\n    \"metadata\": {\n        \"project\": \"checkout\",\n        \"department\": \"engineering\"\n    },\n    \"createdBy\": \"admin@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/api-keys",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "x-api-key",
+								"value": "pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/api-keys/61fb2a9c-576a-4ee1-bbdd-ba3989bafcbc",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "x-api-key",
+								"value": "pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys/61fb2a9c-576a-4ee1-bbdd-ba3989bafcbc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"61fb2a9c-576a-4ee1-bbdd-ba3989bafcbc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/api-keys/x?updatedBy=admin@company.com&x-api-key=pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"clientName\": \"Updated E-commerce Store API\",\n  \"permissions\": [\n    \"payments:read\",\n    \"payments:write\",\n    \"subscriptions:read\"\n  ],\n  \"rateLimit\": 2000,\n  \"isActive\": true,\n  \"expiresAt\": \"2024-12-31T23:59:59.000Z\",\n  \"metadata\": {\n    \"department\": \"engineering\",\n    \"project\": \"checkout\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys/x?updatedBy=admin@company.com&x-api-key=pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"x"
+							],
+							"query": [
+								{
+									"key": "updatedBy",
+									"value": "admin@company.com"
+								},
+								{
+									"key": "x-api-key",
+									"value": "pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/api-keys/yu?deletedBy=uj",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "x-api-key",
+								"value": "pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys/5f6f5a4d-620d-4fcd-bf8d-50e0724f0608?deletedBy=admin@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"5f6f5a4d-620d-4fcd-bf8d-50e0724f0608"
+							],
+							"query": [
+								{
+									"key": "deletedBy",
+									"value": "admin@example.com"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/api-keys/48a36ea9-397c-4f58-bc75-0da8194e3119/deactivate?deactivatedBy=admin@example.com",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "x-api-key",
+								"value": "pk_live_349a65d30c2ed6248cd92d7bfb8b6503486570ca04083953a1132c7f014eea7a",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/api-keys/48a36ea9-397c-4f58-bc75-0da8194e3119/deactivate?deactivatedBy=admin@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"api-keys",
+								"48a36ea9-397c-4f58-bc75-0da8194e3119",
+								"deactivate"
+							],
+							"query": [
+								{
+									"key": "deactivatedBy",
+									"value": "admin@example.com"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subscription Plans",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Enterprise Custom\",\n    \"description\": \"Custom enterprise plan with negotiated pricing\",\n    \"amount\": 999.99,\n    \"currency\": \"USD\",\n    \"billingInterval\": \"yearly\",\n    \"billingIntervalCount\": 1,\n    \"trialPeriodDays\": 0,\n    \"setupFee\": 50,\n    \"metadata\": {\n      \"feature1\": \"dedicated_manager\",\n      \"feature2\": \"sla_guarantee\",\n      \"feature3\": \"custom_integrations\"\n    }\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans?isActive=true&status=active",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans?isActive=true&status=active",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans"
+							],
+							"query": [
+								{
+									"key": "isActive",
+									"value": "true"
+								},
+								{
+									"key": "status",
+									"value": "active"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans/b22b0f10-ab05-4f41-a97d-9e56a9b23612",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans/b22b0f10-ab05-4f41-a97d-9e56a9b23612",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans",
+								"b22b0f10-ab05-4f41-a97d-9e56a9b23612"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans/b22b0f10-ab05-4f41-a97d-9e56a9b23690",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"string\",\n  \"trialPeriodDays\": 0,\n  \"setupFee\": 0,\n  \"maxBillingCycles\": 0,\n  \"status\": \"active\",\n  \"isActive\": true,\n  \"metadata\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans/b22b0f10-ab05-4f41-a97d-9e56a9b23690",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans",
+								"b22b0f10-ab05-4f41-a97d-9e56a9b23690"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans/2d5ddb51-8e10-4385-94a3-a32ecb4b21ef",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "*/*"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans/2d5ddb51-8e10-4385-94a3-a32ecb4b21ef",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans",
+								"2d5ddb51-8e10-4385-94a3-a32ecb4b21ef"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans/1adc1550-6655-4089-8a93-596a868ebde7/deactivate",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans/1adc1550-6655-4089-8a93-596a868ebde7/deactivate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans",
+								"1adc1550-6655-4089-8a93-596a868ebde7",
+								"deactivate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/subscription-plans/1adc1550-6655-4089-8a93-596a868ebde7/archive",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscription-plans/1adc1550-6655-4089-8a93-596a868ebde7/archive",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscription-plans",
+								"1adc1550-6655-4089-8a93-596a868ebde7",
+								"archive"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Subscriptions",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/subscriptions",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"804856d5-fe79-4c42-ab38-101fb9eafde6\",\n  \"subscriptionPlanId\": \"f0de4969-51fd-481c-b373-442796e6b909\",\n  \"paymentMethodId\": \"f0ee62f9-b4fe-44a1-9325-30673de8d7cb\",\n  \"startDate\": \"2025-09-10T00:00:00Z\",\n  \"trialEnd\": \"2025-09-24T00:00:00Z\",\n  \"metadata\": {\n    \"source\": \"web_portal\",\n    \"promotionCode\": \"WELCOME2025\",\n    \"notes\": \"Enterprise plan with additional users\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/subscriptions",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"subscriptions"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment Method",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/payment-methods",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customerId\": \"9ce208e6-719e-4e88-a192-0e7267cf7435\",\n  \"cardNumber\": \"5555555555554444\",\n  \"cardCode\": \"456\",\n  \"expiryMonth\": 6,\n  \"expiryYear\": 2028,\n  \"cardholderName\": \"Alice Johnson\",\n  \"billingAddress\": {\n    \"firstName\": \"Alice\",\n    \"lastName\": \"Johnson\",\n    \"company\": \"TechSoft Ltd\",\n    \"address\": \"456 Market Avenue\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zip\": \"94105\",\n    \"country\": \"USA\"\n  },\n  \"isDefault\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payment-methods",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payment-methods"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payments",
+			"item": [
+				{
+					"name": "http://localhost:3000/api/v1/payments/purchase",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 99.99,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"credit_card\",\n  \"creditCard\": {\n    \"cardNumber\": \"5424000000000015\",\n    \"expiryMonth\": 12,\n    \"expiryYear\": 2026,\n    \"cvv\": \"3456\",\n    \"cardholderName\": \"Sumit Kumar Sarkar\",\n    \"billingAddress\": {\n      \"firstName\": \"Sumit\",\n      \"lastName\": \"Sarkar\",\n      \"company\": \"Guru Medical\",\n      \"address\": \"23 new town, india gate, new delhi\",\n      \"city\": \"Kishanganj\",\n      \"state\": \"Bihar\",\n      \"zip\": \"855107\",\n      \"country\": \"IN\"\n    }\n  },\n  \"customerId\": \"89b4d1fb-49c4-4b32-a14a-ba14690bb5ce\",\n  \"orderId\": \"orderId121\",\n  \"description\": \"string\",\n  \"idempotencyKey\": \"string\",\n  \"metadata\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payments/purchase",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"purchase"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/payments/authorize",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 99.99,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"credit_card\",\n  \"creditCard\": {\n    \"cardNumber\": \"5424000000000015\",\n    \"expiryMonth\": 10,\n    \"expiryYear\": 2027,\n    \"cvv\": \"3490\",\n    \"cardholderName\": \"Jhon Doe\",\n    \"billingAddress\": {\n      \"firstName\": \"Jhon\",\n      \"lastName\": \"Doe\",\n      \"company\": \"Rashan Cart\",\n      \"address\": \"23 new town, india gate, new delhi\",\n      \"city\": \"Kanki\",\n      \"state\": \"West Bengal\",\n      \"zip\": \"733209\",\n      \"country\": \"IN\"\n    }\n  },\n  \"customerId\": \"89b4d1fb-49c4-4b32-a14a-ba19070bb5ce\",\n  \"orderId\": \"orderId753\",\n  \"description\": \"Your description here\",\n  \"idempotencyKey\": \"89b4d1fb-49c4-4b32-a14a-ba19070bb5ce\",\n  \"metadata\": {}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payments/authorize",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"authorize"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/payments/capture",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transactionId\": \"44912de9-a208-4d5e-87ba-88184085fe98\",\n  \"amount\": 50,\n  \"description\": \"Capture transaction\",\n  \"idempotencyKey\": \"89b4d1fb-49c4-4b32-a14a-ba19070bb5ce\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payments/capture",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"capture"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/payments/refund",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transactionId\": \"44912de9-a208-4d5e-87ba-88184085fe98\",\n  \"amount\": 25,\n  \"reason\": \"Not Required\",\n  \"idempotencyKey\": \"89b4d1fb-49c4-4b32-a14a-ba19070bb5re\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payments/refund",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"refund"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "http://localhost:3000/api/v1/payments/cancel",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transactionId\": \"string\",\n  \"reason\": \"string\",\n  \"idempotencyKey\": \"string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/v1/payments/cancel",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"v1",
+								"payments",
+								"cancel"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
