@@ -192,7 +192,7 @@ export class AuthorizeNetService {
     }
   }
 
-  async captureTransaction(captureData: CapturePaymentDto, originalAmount: number): Promise<PaymentResult> {
+  async captureTransaction(captureData: CapturePaymentDto, originalAmount: number, gatewayTransactionId: string): Promise<PaymentResult> {
     try {
       const merchantAuthenticationType = this.createMerchantAuth();
       const amount = captureData.amount || originalAmount;
@@ -204,7 +204,7 @@ export class AuthorizeNetService {
       const transactionRequestType = new this.apiContracts.TransactionRequestType();
       transactionRequestType.setTransactionType(this.apiContracts.TransactionTypeEnum.PRIORAUTHCAPTURETRANSACTION);
       transactionRequestType.setAmount(amount);
-      transactionRequestType.setRefTransId(captureData.transactionId);
+      transactionRequestType.setRefTransId(gatewayTransactionId);
 
       const createRequest = new this.apiContracts.CreateTransactionRequest();
       createRequest.setMerchantAuthentication(merchantAuthenticationType);
@@ -256,13 +256,13 @@ export class AuthorizeNetService {
     }
   }
 
-  async voidTransaction(cancelData: CancelPaymentDto): Promise<PaymentResult> {
+  async voidTransaction(cancelData: CancelPaymentDto, gatewayTransactionId: string): Promise<PaymentResult> {
     try {
       const merchantAuthenticationType = this.createMerchantAuth();
 
       const transactionRequestType = new this.apiContracts.TransactionRequestType();
       transactionRequestType.setTransactionType(this.apiContracts.TransactionTypeEnum.VOIDTRANSACTION);
-      transactionRequestType.setRefTransId(cancelData.transactionId);
+      transactionRequestType.setRefTransId(gatewayTransactionId);
 
       const createRequest = new this.apiContracts.CreateTransactionRequest();
       createRequest.setMerchantAuthentication(merchantAuthenticationType);
